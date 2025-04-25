@@ -1,0 +1,18 @@
+services:
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./postgres14-age/DockerFile
+    container_name: reading-postgres
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    environment:
+      - POSTGRES_DB=isharereading
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=307314
+    ports:
+      - "5432:5432"
