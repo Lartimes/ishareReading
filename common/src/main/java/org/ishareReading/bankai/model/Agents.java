@@ -1,0 +1,93 @@
+package org.ishareReading.bankai.model;
+
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * <p>
+ * agent表
+ * </p>
+ *
+ * @author baomidou
+ * @since 2025-04-25 03:23:29
+ */
+@Getter
+@Setter
+@TableName("agents")
+public class Agents extends BaseModel implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键
+     */
+    @TableId("id")
+    private Long id;
+
+    /**
+     * 智能体名字
+     */
+    @TableField("name")
+    private String name;
+
+    /**
+     * 智能体头像
+     */
+    @TableField("avatar")
+    private String avatar;
+
+    /**
+     * agent 描述
+     */
+    @TableField("description")
+    private String description;
+
+    /**
+     * Agent 系统提示词
+     */
+    @TableField("system_prompt")
+    private String systemPrompt;
+
+    /**
+     * 欢迎提示语
+     */
+    @TableField("welcome_message")
+    private String welcomeMessage;
+
+    /**
+     * 模型配置，包含模型类型、温度等参数
+     */
+    @TableField("model_config")
+    private Object modelConfig;
+
+    /**
+     * Agent 可使用的工具列表
+     */
+    @TableField("tools")
+    private Object tools;
+
+    /**
+     * 知识库ids,json格式，配置仓库信息
+     */
+    @TableField("knowledge_base_ids")
+    private Object knowledgeBaseIds;
+
+    /**
+     * 智能体类型， 1.聊天性 2.功能型agent
+     */
+    @TableField("agent_type")
+    private Integer agentType;
+
+    /**
+     * 创建人用户id
+     */
+    @TableField("user_id")
+    private Long userId;
+
+
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ishareReading.bankai.mapper.BookUnderlineCoordinatesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.ishareReading.bankai.model.BookUnderlineCoordinates">
+        <id column="id" property="id" />
+        <result column="book_id" property="bookId" />
+        <result column="page_number" property="pageNumber" />
+        <result column="start_x" property="startX" />
+        <result column="start_y" property="startY" />
+        <result column="end_x" property="endX" />
+        <result column="end_y" property="endY" />
+        <result column="user_id" property="userId" />
+        <result column="create_at" property="createAt" />
+        <result column="update_at" property="updateAt" />
+        <result column="delete_at" property="deleteAt" />
+    </resultMap>
+
+</mapper>

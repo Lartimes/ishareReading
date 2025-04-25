@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ishareReading.bankai.mapper.MessageGroupTagsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.ishareReading.bankai.model.MessageGroupTags">
+        <id column="id" property="id" />
+        <result column="group_id" property="groupId" />
+        <result column="tag_name" property="tagName" />
+        <result column="create_at" property="createAt" />
+        <result column="update_at" property="updateAt" />
+        <result column="delete_at" property="deleteAt" />
+    </resultMap>
+
+</mapper>
