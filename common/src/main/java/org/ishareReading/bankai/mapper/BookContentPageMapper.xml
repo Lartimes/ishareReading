@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ishareReading.bankai.mapper.BookContentPageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.ishareReading.bankai.model.BookContentPage">
+        <id column="id" property="id"/>
+        <result column="book_id" property="bookId"/>
+        <result column="opinion_text" property="opinionText"/>
+        <result column="content" property="content"/>
+        <result column="pdf_page_stream" property="pdfPageStream"/>
+        <result column="page" property="page"/>
+        <result column="update_at" property="updateAt"/>
+        <result column="delete_at" property="deleteAt"/>
+        <result column="create_at" property="createAt"/>
+    </resultMap>
+
+</mapper>

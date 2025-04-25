@@ -132,4 +132,7 @@ public class Books  extends BaseModel implements Serializable {
     @TableField("file_id")
     private Long fileId;
 
+    @TableField("structure")
+    private Object structure;
+
 }

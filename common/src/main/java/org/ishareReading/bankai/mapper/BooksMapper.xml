@@ -25,6 +25,7 @@
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />
         <result column="delete_at" property="deleteAt" />
+        <result column="structure" property="structure" />
     </resultMap>
 
 </mapper>

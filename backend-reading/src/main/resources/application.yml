@@ -27,3 +27,18 @@ spring:
   threads:
     virtual:
       enabled: true
+  mail:
+    code-validation: 5
+    host: smtp.qq.com
+    username: mingdongiloveu2@qq.com
+    password: "ftdjymtxojmpcihc"
+    port: 465
+    default-encoding: UTF-8
+    protocol: smtps
+    properties:
+      "mail.smtp.connectiontimeout": 5000
+      "mail.smtp.timeout": 3000
+      "mail.smtp.writetimeout": 5000
+      "mail.smtp.auth": true
+      "mail.smtp.starttls.enable": true
+      "mail.smtp.starttls.required": true

@@ -1,18 +1,14 @@
 services:
-
   postgres:
-    build:
-      context: .
-      dockerfile: ./postgres14-age/DockerFile
-    container_name: reading-postgres
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/pgvector/pgvector:pg17
     environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=isharereading
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=307314
     ports:
       - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

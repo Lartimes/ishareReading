@@ -17,7 +17,7 @@
     </modules>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -32,10 +32,17 @@
         <slf4j.version>2.0.16</slf4j.version>
         <lombok.version>1.18.36</lombok.version>
         <jwt.version>4.4.0</jwt.version>
+        <captcha.version>2.3.3</captcha.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!--        验证码-->
+            <dependency>
+                <groupId>pro.fessional</groupId>
+                <artifactId>kaptcha</artifactId>
+                <version>${captcha.version}</version>
+            </dependency>
             <!--           数据库依赖-->
             <dependency>
                 <groupId>org.postgresql</groupId>

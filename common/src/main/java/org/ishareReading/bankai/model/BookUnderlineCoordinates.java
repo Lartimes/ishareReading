@@ -3,11 +3,11 @@ package org.ishareReading.bankai.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.math.BigDecimal;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -71,5 +71,11 @@ public class BookUnderlineCoordinates extends BaseModel implements Serializable 
      */
     @TableField("user_id")
     private Long userId;
+    /**
+     * 相对xpath下环线标注超链接样式
+     */
+    @TableField("relative_xpath")
+    private String relativeXpath;
+
 
 }

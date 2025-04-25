@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/elasticsearch:8.6.2
     container_name: elasticsearch
     privileged: true
     environment:
