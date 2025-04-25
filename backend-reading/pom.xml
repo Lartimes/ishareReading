@@ -21,11 +21,10 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-         <!--        验证码-->
+        <!--        验证码-->
         <dependency>
             <groupId>pro.fessional</groupId>
             <artifactId>kaptcha</artifactId>
-
         </dependency>
 
     </dependencies>

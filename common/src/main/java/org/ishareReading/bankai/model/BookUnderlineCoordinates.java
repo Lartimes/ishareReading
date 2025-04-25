@@ -1,7 +1,6 @@
 package org.ishareReading.bankai.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,11 +23,6 @@ public class BookUnderlineCoordinates extends BaseModel implements Serializable 
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键
-     */
-    @TableId("id")
-    private Long id;
 
     /**
      * 书籍id

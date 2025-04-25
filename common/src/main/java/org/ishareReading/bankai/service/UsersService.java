@@ -2,6 +2,7 @@ package org.ishareReading.bankai.service;
 
 import org.ishareReading.bankai.model.Users;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -22,4 +23,11 @@ public interface UsersService extends IService<Users> {
      * @return
      */
     Users login(Users user);
+
+    /**
+     * 上传用户头像
+     * @param file
+     * @param userId
+     */
+    String uploadAvatar(MultipartFile file, Long userId);
 }

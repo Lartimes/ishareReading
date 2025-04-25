@@ -1,12 +1,11 @@
 package org.ishareReading.bankai.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -22,12 +21,6 @@ import lombok.Setter;
 public class MessageGroupTags extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 标签唯一ID
-     */
-    @TableId("id")
-    private Long id;
 
     /**
      * 消息组ID

@@ -1,12 +1,11 @@
 package org.ishareReading.bankai.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -23,11 +22,6 @@ public class Types extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键
-     */
-    @TableId("id")
-    private Long id;
 
     /**
      * 名字
@@ -36,7 +30,7 @@ public class Types extends BaseModel implements Serializable {
     private String typeName;
 
     /**
-     * 类型：书籍、帖子
+     * 类型：书籍、帖子、文件
      */
     @TableField("type")
     private String type;

@@ -1,12 +1,10 @@
 package org.ishareReading.bankai.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.InputStream;
 import java.io.Serializable;
 
 @Getter
@@ -17,8 +15,6 @@ public class BookContentPage  extends BaseModel implements Serializable {
 //    create_at, update_at, delete_at
     private static final long serialVersionUID = 1L;
 
-    @TableId("id")
-    private Long id;
 
     @TableField("book_id")
     private Long bookId;

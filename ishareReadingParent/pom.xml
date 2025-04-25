@@ -17,7 +17,7 @@
     </modules>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -33,10 +33,17 @@
         <lombok.version>1.18.36</lombok.version>
         <jwt.version>4.4.0</jwt.version>
         <captcha.version>2.3.3</captcha.version>
+        <oss.version>1.0.0</oss.version>
     </properties>
 
     <dependencyManagement>
+        <!-- https://mvnrepository.com/artifact/com.alibaba.cloud/aliyun-oss-spring-boot-starter -->
         <dependencies>
+            <dependency>
+                <groupId>org.ishare</groupId>
+                <artifactId>oss-starter</artifactId>
+                <version>${oss.version}</version>
+            </dependency>
             <!--        验证码-->
             <dependency>
                 <groupId>pro.fessional</groupId>
