@@ -130,4 +130,5 @@ public class Books  extends BaseModel implements Serializable {
     @TableField("structure")
     private Object structure;
 
+
 }

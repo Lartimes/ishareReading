@@ -2,6 +2,7 @@ package org.ishareReading.bankai.service;
 
 import org.ishareReading.bankai.model.Comments;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * <p>
