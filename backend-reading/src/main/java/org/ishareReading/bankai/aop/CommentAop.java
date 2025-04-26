@@ -6,7 +6,6 @@ import org.ishareReading.bankai.response.ResponseCode;
 import org.ishareReading.bankai.service.CommentInterface;
 import org.ishareReading.bankai.service.impl.BookHomePage;
 import org.ishareReading.bankai.service.impl.PostComment;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +17,16 @@ import java.util.Set;
 public class CommentAop {
 
     /// /            book_id , text , type = book / 还有帖子下面的评论comments / post_id , reply_id , text ,type= / 也同上
-    private static final Set<String> POST_COMMENTS = Set.of("type", "userId", "postId", "content"); //"replyCommentId"
-    private static final Set<String> BOOK_COMMENTS = Set.of("type", "userId", "bookId", "content");
+    private static final Set<String> POST_COMMENTS = Set.of("type", "userId", "postId", "text"); //"replyCommentId"
+    private static final Set<String> BOOK_COMMENTS = Set.of("type", "userId", "bookId", "text");
 
 
     //    //    书籍的评论门户首页首页 book_opinions
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
+
+    public CommentAop(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     public Response comment(Map<String, String> map) {
         String type = map.get("type");

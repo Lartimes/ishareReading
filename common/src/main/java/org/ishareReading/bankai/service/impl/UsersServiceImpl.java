@@ -36,7 +36,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     private final OssService ossService;
     private final FilesMapper filesMapper;
 
-    public UsersServiceImpl(@Qualifier("filesMapper") FilesMapper filesMapper, OssService ossService) {
+    public UsersServiceImpl(@Qualifier("filesMapper") FilesMapper filesMapper,@Qualifier("ossService") OssService ossService) {
         this.filesMapper = filesMapper;
         this.ossService = ossService;
     }
@@ -44,7 +44,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Override
     public Users login(Users user) {
         final String password = user.getPassword();
-        LambdaQueryWrapper<Users> email = new LambdaQueryWrapper<Users>().eq(Users::getEmail, user.getEmail());
+        LambdaQueryWrapper<Users> email = new LambdaQueryWrapper<Users>()
+                .eq(Users::getEmail, user.getEmail()).last("limit 1");
 
         final Users destUser = this.getOne(email);
         if (destUser != null) {
