@@ -32,7 +32,7 @@ public interface RedisConstant {
 
 
     String LIKE_PREFIX = "like";
-    String LIKE_COUNT = "like:count:";
+    String LIKE_COUNT = "like:count";
 
     String LIKE_LISTENER = "like:listener:";
 

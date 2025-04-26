@@ -92,7 +92,7 @@ public class Books  extends BaseModel implements Serializable {
     private BigDecimal averageRating;
 
     /**
-     * 用户评价总数
+     * 用户评价总数改为 点赞数,
      */
     @TableField("rating_count")
     private Integer ratingCount;
@@ -129,5 +129,6 @@ public class Books  extends BaseModel implements Serializable {
 
     @TableField("structure")
     private Object structure;
+
 
 }

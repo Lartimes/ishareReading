@@ -111,6 +111,8 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
             arr.add(likes);
         }
         cursor.close();
+        redisCacheUtil.removeZSetValue(RedisConstant.LIKE_LISTENER + type, objectId);
+        //删除点赞动作的目标对象
         return arr;
     }
 
