@@ -17,16 +17,19 @@ spring:
     name: back-reading
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:isharereading}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:54321}/${DB_NAME:isharereading}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:307314}
+    password: ${DB_PASSWORD:postgres}
+  #    redis配置
   data:
     redis:
       host: localhost
       port: 6379
+  #      spring servlet 虚拟线程开启
   threads:
     virtual:
       enabled: true
+  #      qq邮箱配置
   mail:
     code-validation: 5
     host: smtp.qq.com
@@ -42,7 +45,12 @@ spring:
       "mail.smtp.auth": true
       "mail.smtp.starttls.enable": true
       "mail.smtp.starttls.required": true
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
 
+
+#阿里云OSS配置
 aliyun:
   oss:
     buckets:

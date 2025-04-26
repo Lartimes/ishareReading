@@ -10,8 +10,14 @@
         <relativePath>../ishareReadingParent/pom.xml</relativePath>
     </parent>
     <artifactId>common</artifactId>
+    <version>1.0.0</version>
 
     <dependencies>
+        <!--        验证码-->
+        <dependency>
+            <groupId>pro.fessional</groupId>
+            <artifactId>kaptcha</artifactId>
+        </dependency>
         <!-- 工具库 -->
         <dependency>
             <groupId>com.alibaba</groupId>

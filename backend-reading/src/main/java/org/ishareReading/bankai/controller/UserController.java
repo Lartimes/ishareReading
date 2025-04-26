@@ -1,5 +1,6 @@
 package org.ishareReading.bankai.controller;
 
+import org.ishareReading.bankai.aop.CommentAop;
 import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.response.Response;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -55,8 +58,6 @@ public class UserController {
         }
         return Response.fail("上传失败");
     }
-
-
 //    这个关注的需要重构， aop + context + 切面 类似于SPI ，
 //    @GetMapping("/follow/{targetUserId}")
 //    public Response follow(@PathVariable("targetUserId") Long targetUserId) {
@@ -64,6 +65,30 @@ public class UserController {
 //        Users byId = usersService.getById(targetUserId);
 //        usersService.followUsers();
 //    }
+
+
+
+    @Autowired
+    private CommentAop commentAop;
+
+
+    /**
+     * 评论、见解，包含帖子评论、书籍首页鉴赏信息等
+     * @param map
+     * @return
+     */
+    @PostMapping
+    public Response comment(@RequestBody Map<String, String> map) {
+        Long userId = UserHolder.get();
+        if(userId == null){
+            return Response.fail("请登录后进行评论");
+        }
+        map.put("userId", String.valueOf(userId));
+        return  commentAop.comment(map);
+    }
+
+
+
 
 
 }

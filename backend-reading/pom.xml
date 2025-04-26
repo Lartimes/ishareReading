@@ -21,12 +21,10 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-        <!--        验证码-->
         <dependency>
-            <groupId>pro.fessional</groupId>
-            <artifactId>kaptcha</artifactId>
+            <groupId>org.ishare</groupId>
+            <artifactId>oss-starter</artifactId>
         </dependency>
-
     </dependencies>
 
 </project>

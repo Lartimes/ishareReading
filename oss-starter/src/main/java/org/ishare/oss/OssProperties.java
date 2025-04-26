@@ -1,4 +1,4 @@
-package com.example.oss;
+package org.ishare.oss;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.Map;

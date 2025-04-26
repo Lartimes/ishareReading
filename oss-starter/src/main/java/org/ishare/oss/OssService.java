@@ -1,15 +1,17 @@
-package com.example.oss;
+package org.ishare.oss;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.ListObjectsRequest;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import com.aliyun.oss.model.ObjectMetadata;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class OssService {
     //    bucket --> OSS
 //

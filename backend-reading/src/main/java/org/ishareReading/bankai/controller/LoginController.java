@@ -7,7 +7,6 @@ import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.LoginService;
 import org.ishareReading.bankai.service.UsersService;
 import org.ishareReading.bankai.utils.JWTUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +18,16 @@ import java.util.Map;
 @RequestMapping("/login")
 public class LoginController {
 
-    @Autowired
-    private LoginService loginService;
-    @Autowired
-    private UsersService userService;
+    private final LoginService loginService;
+    private final UsersService userService;
 
-    @Autowired
-    private JWTUtils jwtUtils;
+    private final JWTUtils jwtUtils;
+
+    public LoginController(LoginService loginService, UsersService userService, JWTUtils jwtUtils) {
+        this.loginService = loginService;
+        this.userService = userService;
+        this.jwtUtils = jwtUtils;
+    }
 
 
     /**

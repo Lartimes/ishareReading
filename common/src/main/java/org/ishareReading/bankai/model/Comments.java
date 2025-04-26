@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -52,5 +53,13 @@ public class Comments extends BaseModel implements Serializable {
      */
     @TableField("like_count")
     private Integer likeCount;
+    private List<Comments> replies;
 
+    public List<Comments> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(List<Comments> replies) {
+        this.replies = replies;
+    }
 }

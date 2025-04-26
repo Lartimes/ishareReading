@@ -2,9 +2,9 @@ package org.ishareReading.bankai.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.oss.OssService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ishare.oss.OssService;
 import org.ishareReading.bankai.constant.BucketConstant;
 import org.ishareReading.bankai.exception.BusinessException;
 import org.ishareReading.bankai.mapper.FilesMapper;
@@ -13,7 +13,7 @@ import org.ishareReading.bankai.model.Files;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.service.UsersService;
 import org.ishareReading.bankai.utils.FileUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -33,8 +33,13 @@ import java.io.InputStream;
 @Service
 public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService {
     private static final Logger LOG = LogManager.getLogger(UsersServiceImpl.class);
-    @Autowired
-    private OssService ossService;
+    private final OssService ossService;
+    private final FilesMapper filesMapper;
+
+    public UsersServiceImpl(@Qualifier("filesMapper") FilesMapper filesMapper, OssService ossService) {
+        this.filesMapper = filesMapper;
+        this.ossService = ossService;
+    }
 
     @Override
     public Users login(Users user) {
@@ -54,9 +59,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         LOG.info("密码错误 :{}", user);
         throw new BusinessException("密码错误");
     }
-
-    @Autowired
-    private FilesMapper filesMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override

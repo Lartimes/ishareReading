@@ -1,4 +1,4 @@
-package com.example.oss;
+package org.ishare.oss;
 
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 
 public class ObjectNameUtil {
 

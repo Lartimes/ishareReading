@@ -22,7 +22,8 @@ public class BookOpinions extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-
+    @TableField("user_id")
+    private Long userId;
     /**
      * 下划线id
      */
