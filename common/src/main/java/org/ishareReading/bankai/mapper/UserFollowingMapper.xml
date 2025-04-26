@@ -10,6 +10,8 @@
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />
         <result column="delete_at" property="deleteAt" />
+        <result column="type_name" property="typeId" />
+        <result column="type" property="type" />
     </resultMap>
 
 </mapper>
