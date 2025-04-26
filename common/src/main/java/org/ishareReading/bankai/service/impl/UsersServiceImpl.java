@@ -45,6 +45,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     public Users login(Users user) {
         final String password = user.getPassword();
         LambdaQueryWrapper<Users> email = new LambdaQueryWrapper<Users>().eq(Users::getEmail, user.getEmail());
+
         final Users destUser = this.getOne(email);
         if (destUser != null) {
             if (destUser.getPassword().equals(password)) {
@@ -87,6 +88,4 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         filesMapper.insert(files);
         return key;
     }
-
-
 }

@@ -64,3 +64,7 @@ aliyun:
         accessKeyId: your-access-key-id
         accessKeySecret: your-access-key-secret
         bucketName: your-bucket2-name
+jwt:
+  config:
+    secret: "xyx8BDbRigUDaY6pZFfWus2jZWLPHO"
+    expire: 864000000000
