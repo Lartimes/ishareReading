@@ -17,7 +17,6 @@ import org.ishareReading.bankai.service.LoginService;
 import org.ishareReading.bankai.service.UsersService;
 import org.ishareReading.bankai.utils.EmailSenderUtil;
 import org.ishareReading.bankai.utils.RedisCacheUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -33,15 +32,17 @@ import java.util.Random;
 @Service
 public class LoginServiceImpl implements LoginService {
     private static final Logger LOG = LogManager.getLogger(LoginServiceImpl.class);
-
+    private final EmailSenderUtil emailSenderUtil;
+    private final RedisCacheUtil redisCacheUtil;
+    private final UsersService userService;
     @Resource
     private Producer captchaProducer;
-    @Autowired
-    private EmailSenderUtil emailSenderUtil;
-    @Autowired
-    private RedisCacheUtil redisCacheUtil;
-    @Autowired
-    private UsersService userService;
+
+    public LoginServiceImpl(EmailSenderUtil emailSenderUtil, RedisCacheUtil redisCacheUtil, UsersService userService) {
+        this.emailSenderUtil = emailSenderUtil;
+        this.redisCacheUtil = redisCacheUtil;
+        this.userService = userService;
+    }
 
 
     @Override

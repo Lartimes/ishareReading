@@ -27,7 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
         LOG.info("加载拦截器");
         registry.addInterceptor(this.tokenInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/index");
+                .excludePathPatterns("/index"
+                ,"/login");
     }
 
 

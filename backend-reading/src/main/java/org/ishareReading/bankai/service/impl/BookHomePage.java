@@ -1,9 +1,9 @@
 package org.ishareReading.bankai.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.ishareReading.bankai.mapper.BookOpinionsMapper;
 import org.ishareReading.bankai.model.BookOpinions;
 import org.ishareReading.bankai.response.Response;
+import org.ishareReading.bankai.service.BookOpinionsService;
 import org.ishareReading.bankai.service.CommentInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,9 +13,10 @@ import java.util.Map;
 
 //===================================================
 @Service
-public  class BookHomePage implements CommentInterface {
+public class BookHomePage implements CommentInterface {
+
     @Autowired
-    private BookOpinionsMapper bookOpinionsMapper;
+    private BookOpinionsService bookOpinionsService;
 
     @Override
     public String getType() {
@@ -26,7 +27,7 @@ public  class BookHomePage implements CommentInterface {
     @Override
     public Response getComment(Map<String, String> map) {
         long bookId = Long.parseLong(map.get("bookId"));
-        Collection<BookOpinions> bookOpinions = bookOpinionsMapper.selectList(new LambdaQueryWrapper<BookOpinions>()
+        Collection<BookOpinions> bookOpinions = bookOpinionsService.list(new LambdaQueryWrapper<BookOpinions>()
                 .eq(BookOpinions::getId, bookId)
                 .isNull(BookOpinions::getUnderlinedId)
                 //非具体页数的评论,作为书籍详情
@@ -39,11 +40,11 @@ public  class BookHomePage implements CommentInterface {
         long id = Long.parseLong(map.get("id"));
         long userId = Long.parseLong(map.get("userId"));
 //        主键id
-        int delete = bookOpinionsMapper.delete(
+        boolean remove = bookOpinionsService.remove(
                 new LambdaQueryWrapper<BookOpinions>()
                         .eq(BookOpinions::getId, id)
                         .eq(BookOpinions::getUserId, userId));
-        if (delete > 0) {
+        if (remove) {
             return Response.success("删除成功");
         }
         return Response.fail("删除失败");
@@ -55,10 +56,10 @@ public  class BookHomePage implements CommentInterface {
         BookOpinions bookOpinions = new BookOpinions();
         bookOpinions.setUserId(userId);
         bookOpinions.setOpinionText(map.get("text"));
-        int insert = bookOpinionsMapper.insert(bookOpinions);
+        boolean save = bookOpinionsService.save(bookOpinions);
         Long id = bookOpinions.getId();
-        if (insert > 0) {
-            BookOpinions selected = bookOpinionsMapper.selectById(id);
+        if (save) {
+            BookOpinions selected = bookOpinionsService.getById(id);
             return Response.success(selected);
         }
         return Response.fail("请重新尝试");

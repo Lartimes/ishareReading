@@ -2,7 +2,7 @@ package org.ishareReading.bankai.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 import java.io.Serializable;
@@ -27,7 +27,7 @@ public class Users extends BaseModel implements Serializable {
      * 邮箱
      */
     @TableField("email")
-    @NotBlank(message = "email 不能为空")
+    @Email
     private String email;
 
     /**

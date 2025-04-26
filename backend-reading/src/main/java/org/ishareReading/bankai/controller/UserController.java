@@ -77,7 +77,7 @@ public class UserController {
      * @param map
      * @return
      */
-    @PostMapping
+    @PostMapping("/addComment")
     public Response comment(@RequestBody Map<String, String> map) {
         Long userId = UserHolder.get();
         if(userId == null){
