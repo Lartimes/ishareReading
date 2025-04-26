@@ -29,9 +29,24 @@ public class UserFollowing  extends BaseModel implements Serializable {
     private Long userId;
 
     /**
-     * 关注的用户id
+     * 关注的一类ID 可为用户id 、 书籍类型、作者、帖子类型等
      */
     @TableField("follow_id")
-    private Long followId;
+    private String followId;
+
+    /**
+     * 用户、 书籍类型、作者、帖子类型分区等
+     */
+    @TableField("type")
+    private String type;
+
+
+    /**
+     * type表详细信息id
+     */
+    @TableField("type_id")
+    private String typeId;
+
+
 
 }
