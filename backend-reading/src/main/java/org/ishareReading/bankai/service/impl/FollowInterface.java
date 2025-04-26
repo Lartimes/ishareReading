@@ -38,7 +38,7 @@ class PostFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> i
     final String type = "PostFollow";
 
     @Autowired
-    RedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate;
 
     @Override
     public void follow(String id) {
@@ -79,7 +79,7 @@ class PostFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> i
 @Service
 class  UserFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> implements FollowInterface {
     @Autowired
-    RedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate;
     final String type = "UserFollow";
     /**
      *
@@ -131,7 +131,7 @@ class  UserFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> 
 @Service
 class BookTypeFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> implements FollowInterface {
     @Autowired
-    RedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate;
     final String type = "BookTypeFollow";
 
     @Override
@@ -174,7 +174,7 @@ class BookTypeFollowService extends ServiceImpl<UserFollowingMapper,UserFollowin
 class AuthorFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> implements FollowInterface {
 
     @Autowired
-    RedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate;
     final String type = "AuthorFollow";
 
 
