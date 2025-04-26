@@ -4,6 +4,7 @@ import org.ishareReading.bankai.aop.CommentAop;
 import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.response.Response;
+import org.ishareReading.bankai.service.LikesService;
 import org.ishareReading.bankai.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -18,6 +19,17 @@ import java.util.Objects;
 public class UserController {
     @Autowired
     private UsersService usersService;
+    @Autowired
+    private CommentAop commentAop;
+    @Autowired
+    private LikesService likesService;
+//    这个关注的需要重构， aop + context + 切面 类似于SPI ，
+//    @GetMapping("/follow/{targetUserId}")
+//    public Response follow(@PathVariable("targetUserId") Long targetUserId) {
+//        Long userId = UserHolder.get();
+//        Users byId = usersService.getById(targetUserId);
+//        usersService.followUsers();
+//    }
 
     /**
      * 根据用户id查看个人信息
@@ -36,7 +48,6 @@ public class UserController {
         return Response.success(byId);
     }
 
-
     /**
      * 更新用户头像
      *
@@ -49,7 +60,7 @@ public class UserController {
     public Response uploadAvatar(@RequestParam("file") MultipartFile file,
                                  @RequestParam("userId") Long userId) {
         Long currentUserId = UserHolder.get();
-        if(!Objects.equals(currentUserId, userId)){
+        if (!Objects.equals(currentUserId, userId)) {
             return Response.fail("只可以上传自己的头像");
         }
         String url = usersService.uploadAvatar(file, userId);
@@ -58,33 +69,46 @@ public class UserController {
         }
         return Response.fail("上传失败");
     }
-//    这个关注的需要重构， aop + context + 切面 类似于SPI ，
-//    @GetMapping("/follow/{targetUserId}")
-//    public Response follow(@PathVariable("targetUserId") Long targetUserId) {
-//        Long userId = UserHolder.get();
-//        Users byId = usersService.getById(targetUserId);
-//        usersService.followUsers();
-//    }
-
-
-
-    @Autowired
-    private CommentAop commentAop;
-
 
     /**
      * 评论、见解，包含帖子评论、书籍首页鉴赏信息等
+     *
      * @param map
+     *
      * @return
      */
     @PostMapping("/addComment")
     public Response comment(@RequestBody Map<String, String> map) {
         Long userId = UserHolder.get();
-        if(userId == null){
+        if (userId == null) {
             return Response.fail("请登录后进行评论");
         }
         map.put("userId", String.valueOf(userId));
-        return  commentAop.comment(map);
+        return commentAop.comment(map);
+    }
+
+    /**
+     * 进行点赞
+     * @param objectId
+     * @param type
+     * @return
+     */
+    @GetMapping("/likeObject/{type}/{objectId}")
+    public Response likeObject(@PathVariable("objectId") Long objectId,
+                               @PathVariable("type") String type) {
+        return  likesService.likeObject(objectId , type , UserHolder.get());
+    }
+
+    /**
+     * 取消点赞
+     * @param objectId
+     * @param type
+     * @return
+     */
+    @GetMapping("/unlikeObject/{type}/{objectId}")
+    public Response unlikeObject(@PathVariable("objectId") Long objectId,
+                               @PathVariable("type") String type) {
+        return  likesService.unlikeObject(objectId , type , UserHolder.get());
     }
 
 

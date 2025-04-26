@@ -42,6 +42,15 @@ public class RedisCacheUtil {
             return false;
         }
     }
+     public boolean hRemove(String key, Collection<Object> objects) {
+        try {
+            redisTemplate.opsForHash().delete(key, objects);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     public RedisTemplate<String, Object> getRedisTemplate() {
         return redisTemplate;

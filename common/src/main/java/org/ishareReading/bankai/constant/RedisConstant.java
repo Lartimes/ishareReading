@@ -10,4 +10,12 @@ public interface RedisConstant {
 
     // 用户粉丝
     String USER_FANS = "user:fans:";
+
+
+    String LIKE_PREFIX = "like";
+    String LIKE_COUNT = "like:count:";
+
+    String LIKE_LISTENER = "like:listener:";
+
+
 }
