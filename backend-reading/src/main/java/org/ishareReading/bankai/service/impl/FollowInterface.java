@@ -48,13 +48,14 @@ class PostFollowService implements FollowInterface {
 
 //用户关注取关
 @Service
-class UserFollowService extends ServiceImpl<UserFollowingMapper, UserFollowing> implements FollowInterface {
+class  UserFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing> implements FollowInterface {
     @Autowired
     RedisTemplate redisTemplate;
 
     /**
-     * @param type 要关注人的Id
-     * @param id   用户的Id
+     *
+     * @param type  要关注人的Id
+     * @param id    用户的Id
      */
     @Override
     public void follow(String type, String id) {
@@ -64,7 +65,7 @@ class UserFollowService extends ServiceImpl<UserFollowingMapper, UserFollowing> 
 
         // 直接保存(唯一索引),保存失败则删除
         final UserFollowing follow = new UserFollowing();
-        follow.setFollowId(type);
+        follow.setFollowId(Long.valueOf(type));
         follow.setUserId(Long.valueOf((id)));
         try {
             save(follow);
@@ -83,10 +84,10 @@ class UserFollowService extends ServiceImpl<UserFollowingMapper, UserFollowing> 
     public void unfollow(String type, String id) {
         // 直接保存(唯一索引),保存失败则删除
         final UserFollowing follow = new UserFollowing();
-        follow.setFollowId(type);
+        follow.setFollowId(Long.valueOf(type));
         follow.setUserId(Long.valueOf((id)));
         try {
-            this.remove(new LambdaQueryWrapper<UserFollowing>().eq(UserFollowing::getUserId, id).eq(UserFollowing::getFollowId, type));
+             this.remove(new LambdaQueryWrapper<UserFollowing>().eq(UserFollowing::getUserId, id).eq(UserFollowing::getFollowId,type));
             // 自己关注列表添加
             redisTemplate.opsForZSet().remove(RedisConstant.USER_FOLLOW + id, type);
             // 对方粉丝列表添加
