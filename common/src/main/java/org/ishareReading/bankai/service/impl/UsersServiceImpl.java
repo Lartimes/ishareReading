@@ -5,14 +5,22 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.oss.OssService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ishareReading.bankai.constant.BucketConstant;
 import org.ishareReading.bankai.exception.BusinessException;
+import org.ishareReading.bankai.mapper.FilesMapper;
 import org.ishareReading.bankai.mapper.UsersMapper;
+import org.ishareReading.bankai.model.Files;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.service.UsersService;
+import org.ishareReading.bankai.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * <p>
@@ -20,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
  * </p>
  *
  * @author baomidou
- * @since 2025-04-25 03:30:37
+ * @since 2025-04-25 03:30:37..
  */
 @Service
 public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService {
@@ -47,24 +55,35 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         throw new BusinessException("密码错误");
     }
 
+    @Autowired
+    private FilesMapper filesMapper;
+
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public String uploadAvatar(MultipartFile file, Long userId) {
-        // 文件大小（字节）
-        long size = file.getSize();
-        // 原始文件名
-        String originalFilename = file.getOriginalFilename();
-        // 文件类型（MIME类型）
-        String contentType = file.getContentType();
-        // 文件扩展名
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+        Users currentUser = this.getById(userId);
+        String key = null;
+        try {
+            InputStream inputStream = file.getInputStream();
+            key = ossService.upload(BucketConstant.COMMON_BUCKET_NAME, inputStream);
+        } catch (IOException e) {
+            throw new BusinessException(e.getMessage());
         }
-
-        System.out.println("文件大小: " + size + " 字节");
-        System.out.println("原始文件名: " + originalFilename);
-        System.out.println("文件类型: " + contentType);
-        System.out.println("文件扩展名: " + extension);
+        long size = file.getSize();
+        String originalFilename = file.getOriginalFilename();
+        String type = FileUtil.detectFileType(file); //获取文件type ,音频、文本。。。
+        String contentType = file.getContentType();
+        currentUser.setAvatar(key);
+        this.updateById(currentUser);
+        Files files = new Files();
+        files.setFileName(originalFilename);
+        files.setFilePath(key);
+        files.setSize(size);
+        files.setFormat(contentType);
+        files.setType(type);
+        files.setUserId(userId);
+        filesMapper.insert(files);
+        return key;
     }
 
 

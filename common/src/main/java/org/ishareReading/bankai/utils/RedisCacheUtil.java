@@ -123,9 +123,8 @@ public class RedisCacheUtil {
         } catch (Exception ignore) {
             return null;
         }
-
-
     }
+
 
 
     /**

@@ -6,9 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FileTypeUtil {
-    private FileTypeUtil(){}
-
+public class FileUtil {
     private static final Set<String> IMAGE_TYPES = new HashSet<>(Arrays.asList(
             "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff", "svg"
     ));
@@ -21,6 +19,16 @@ public class FileTypeUtil {
     private static final Set<String> VIDEO_TYPES = new HashSet<>(Arrays.asList(
             "mp4", "avi", "mov", "wmv", "flv", "mkv", "webm"
     ));
+    private FileUtil() {
+    }
+
+    public static String getExtension(String originalFilename) {
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+        }
+        return extension;
+    }
 
     public static String detectFileType(MultipartFile file) {
         String contentType = file.getContentType();
