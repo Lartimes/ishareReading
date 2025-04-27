@@ -2,6 +2,10 @@ package org.ishareReading.bankai.service;
 
 import org.ishareReading.bankai.model.Books;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.ishareReading.bankai.model.HotBook;
+
+import java.awt.print.Book;
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface BooksService extends IService<Books> {
 
+    List<HotBook> getBookHotRank();
 }
