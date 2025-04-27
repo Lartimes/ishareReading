@@ -1,6 +1,6 @@
 spring:
-#  profiles:
-#    active: devxyx
+  profiles:
+    active: devxyx
   application:
     name: back-reading
   datasource:
