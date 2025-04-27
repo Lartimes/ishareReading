@@ -88,31 +88,53 @@ public class UserController {
     }
 
     /**
+     * 删除评论,帖子评论 , 首页评论
+     *
+     * @param map
+     *
+     * @return
+     */
+    @DeleteMapping("/delComment")
+    public Response delComment(@RequestBody Map<String, String> map) {
+        Long userId = UserHolder.get();
+        assert userId != null;
+        String param = map.get("userId");
+        if (!param.equals(userId.toString())) {
+            return Response.fail("只能删除自己的评论");
+        }
+        return commentAop.delComment(map);
+    }
+
+
+
+
+    /**
      * 进行点赞
+     *
      * @param objectId
      * @param type
+     *
      * @return
      */
     @GetMapping("/likeObject/{type}/{objectId}")
     public Response likeObject(@PathVariable("objectId") Long objectId,
                                @PathVariable("type") String type) {
-        return  likesService.likeObject(objectId , type , UserHolder.get());
+        return likesService.likeObject(objectId, type, UserHolder.get());
     }
 
     /**
      * 取消点赞
+     *
      * @param objectId
      * @param type
+     *
      * @return
      */
     @GetMapping("/unlikeObject/{type}/{objectId}")
     public Response unlikeObject(@PathVariable("objectId") Long objectId,
-                               @PathVariable("type") String type) {
-        return  likesService.unlikeObject(objectId , type , UserHolder.get());
+                                 @PathVariable("type") String type) {
+        return likesService.unlikeObject(objectId, type, UserHolder.get());
     }
-
-
-
 
 
 }

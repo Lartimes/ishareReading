@@ -67,4 +67,4 @@ aliyun:
 jwt:
   config:
     secret: "xyx8BDbRigUDaY6pZFfWus2jZWLPHO"
-    expire: 864000000000
+    expire: 8640000000000
