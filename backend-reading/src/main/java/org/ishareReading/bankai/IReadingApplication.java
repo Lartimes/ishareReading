@@ -35,6 +35,9 @@ public class IReadingApplication implements CommandLineRunner {
     private BookOpinionsService bookOpinionsService;
 
     @Autowired
+    private BooksService booksService;
+
+    @Autowired
     private HotRank hotRank;
 
     public static void main(String[] args) {
@@ -43,7 +46,12 @@ public class IReadingApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        hotRank.bookHotRank();
+        Books books = new Books();
+        books.setName("Red Book");
+        books.setUploadTime(LocalDateTime.now());
+        books.setGenre("盗墓");
+        books.setId(1916713914342154241L);
+        booksService.updateById(books);
     }
 
     @Bean
