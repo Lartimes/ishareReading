@@ -1,30 +1,34 @@
 package org.ishareReading.bankai;
 
-import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import org.apache.ibatis.reflection.MetaObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ishare.oss.OssProperties;
-import org.ishareReading.bankai.model.BookOpinions;
-import org.ishareReading.bankai.service.BookOpinionsService;
+import org.ishareReading.bankai.utils.BookUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.Resource;
 
-import java.time.LocalDateTime;
+import java.io.InputStream;
 
 
-@SpringBootApplication
-@EnableConfigurationProperties(OssProperties.class)
-@MapperScan(basePackages = {"org.ishareReading.bankai.mapper"})
+
+@EnableConfigurationProperties({OssProperties.class})
 @ComponentScan(basePackages = {"org.ishare.oss", "org.ishareReading.bankai"})
+@MapperScan(basePackages = {"org.ishareReading.bankai.mapper"})
+@SpringBootApplication(scanBasePackages = {"org.ishareReading" ,"org.ishare" })
 public class IReadingApplication implements CommandLineRunner {
 
+    @Value("classpath:/a.pdf")
+    private Resource springAiResource;
     @Autowired
-    private BookOpinionsService bookOpinionsService;
+    private BookUtils bookUtils;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public static void main(String[] args) {
         SpringApplication.run(IReadingApplication.class, args);
@@ -32,25 +36,10 @@ public class IReadingApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        BookOpinions entity = new BookOpinions();
-        entity.setId(1916071924907986946L);
-        entity.setOpinionText("这是一本好书22");
-        bookOpinionsService.updateById(entity);
+        InputStream inputStream = springAiResource.getInputStream();
+        Object metadata = bookUtils.getMetadata(inputStream.readAllBytes());
+        System.out.println(metadata);
     }
 
-    @Bean
-    public MetaObjectHandler metaObjectHandler() {
-        return new MetaObjectHandler() {
-            @Override
-            public void insertFill(MetaObject metaObject) {
-                this.strictInsertFill(metaObject, "createAt", LocalDateTime.class, LocalDateTime.now());
-                this.strictInsertFill(metaObject, "updateAt", LocalDateTime.class, LocalDateTime.now());
-            }
 
-            @Override
-            public void updateFill(MetaObject metaObject) {
-                this.strictUpdateFill(metaObject, "updateAt", LocalDateTime.class, LocalDateTime.now());
-            }
-        };
-    }
 }

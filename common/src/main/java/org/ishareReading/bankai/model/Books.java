@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
+import org.ishareReading.bankai.config.MapTypeHandler;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @TableName("books")
-public class Books  extends BaseModel implements Serializable {
+public class Books extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -127,7 +128,7 @@ public class Books  extends BaseModel implements Serializable {
     @TableField("file_id")
     private Long fileId;
 
-    @TableField("structure")
+    @TableField(value = "structure" , typeHandler = MapTypeHandler.class)
     private Object structure;
 
 

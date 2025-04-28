@@ -22,7 +22,7 @@ public class BookContentPage  extends BaseModel implements Serializable {
     @TableField("content")
     private String content;
 
-    @TableField("pdf_page_stream")
+    @TableField(value = "pdf_page_stream" ,exist = false)
     private byte[]  pdfPageStream;
     @TableField("page")
     private Integer page;

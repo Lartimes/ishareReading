@@ -39,11 +39,17 @@
         <jwt.version>4.4.0</jwt.version>
         <captcha.version>2.3.3</captcha.version>
         <oss.version>1.0.0</oss.version>
+        <pdf.version>3.0.3</pdf.version>
     </properties>
 
     <dependencyManagement>
         <!-- https://mvnrepository.com/artifact/com.alibaba.cloud/aliyun-oss-spring-boot-starter -->
         <dependencies>
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${pdf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.ishare</groupId>
                 <artifactId>oss-starter</artifactId>
@@ -106,6 +112,11 @@
                 <groupId>com.auth0</groupId>
                 <artifactId>java-jwt</artifactId>
                 <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hankcs</groupId>
+                <artifactId>hanlp</artifactId>
+                <version>portable-1.8.6</version>
             </dependency>
 
         </dependencies>

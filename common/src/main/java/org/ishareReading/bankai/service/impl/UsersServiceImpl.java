@@ -36,7 +36,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     private final OssService ossService;
     private final FilesMapper filesMapper;
 
-    public UsersServiceImpl(@Qualifier("filesMapper") FilesMapper filesMapper,@Qualifier("ossService") OssService ossService) {
+    public UsersServiceImpl(@Qualifier("filesMapper") FilesMapper filesMapper, @Qualifier("ossService") OssService ossService) {
         this.filesMapper = filesMapper;
         this.ossService = ossService;
     }
@@ -67,14 +67,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     public String uploadAvatar(MultipartFile file, Long userId) {
         Users currentUser = this.getById(userId);
         String key = null;
+        String originalFilename = file.getOriginalFilename();
         try {
             InputStream inputStream = file.getInputStream();
-            key = ossService.upload(BucketConstant.COMMON_BUCKET_NAME, inputStream);
+            key = ossService.upload(BucketConstant.COMMON_BUCKET_NAME, inputStream, originalFilename);
         } catch (IOException e) {
             throw new BusinessException(e.getMessage());
         }
         long size = file.getSize();
-        String originalFilename = file.getOriginalFilename();
+
         String type = FileUtil.detectFileType(file); //获取文件type ,音频、文本。。。
         String contentType = file.getContentType();
         currentUser.setAvatar(key);

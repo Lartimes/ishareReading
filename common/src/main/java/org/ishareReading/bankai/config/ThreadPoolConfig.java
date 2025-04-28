@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
@@ -15,8 +14,6 @@ public class ThreadPoolConfig {
     public ThreadPoolTaskScheduler customThreadPoolTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(5);
-        ScheduledThreadPoolExecutor executor = scheduler.getScheduledThreadPoolExecutor();
-        executor.setMaximumPoolSize(15);
         scheduler.setThreadNamePrefix("scheduled-task-");
         scheduler.setPoolSize(Runtime.getRuntime().availableProcessors() * 2);
         scheduler.setRejectedExecutionHandler(new CustomRejectedExecutionHandler());

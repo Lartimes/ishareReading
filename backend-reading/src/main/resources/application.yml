@@ -3,6 +3,7 @@ server:
   servlet:
     context-path: /ishareReading
   # 添加Tomcat异步请求配置
+
   tomcat:
     threads:
       max: 200 # 最大工作线程数
@@ -13,6 +14,11 @@ server:
     async-timeout: 300000 # 异步请求超时时间 5分钟
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
   application:
     name: back-reading
   datasource:
@@ -54,16 +60,11 @@ spring:
 aliyun:
   oss:
     buckets:
-      bucket1:
-        endpoint: https://oss-cn-hangzhou.aliyuncs.com
-        accessKeyId: your-access-key-id
-        accessKeySecret: your-access-key-secret
-        bucketName: your-bucket1-name
-      bucket2:
-        endpoint: https://oss-cn-shanghai.aliyuncs.com
-        accessKeyId: your-access-key-id
-        accessKeySecret: your-access-key-secret
-        bucketName: your-bucket2-name
+      bankai:
+        endpoint: oss-cn-hangzhou.aliyuncs.com
+        accessKeyId: LTAI5tRubA1tFPH7RMeSUAPt
+        accessKeySecret: ClNjKHKk2BYncyzLg4aJFck1YZyAdy
+        bucketName: bankai
 jwt:
   config:
     secret: "xyx8BDbRigUDaY6pZFfWus2jZWLPHO"

@@ -1,11 +1,19 @@
 package org.ishare.oss;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import java.util.Map;
 
 @ConfigurationProperties(prefix = "aliyun.oss")
 public class OssProperties {
     private Map<String, BucketConfig> buckets;
+
+    @Override
+    public String toString() {
+        return "OssProperties{" +
+                "buckets=" + buckets +
+                '}';
+    }
 
     public Map<String, BucketConfig> getBuckets() {
         return buckets;
@@ -20,6 +28,16 @@ public class OssProperties {
         private String accessKeyId;
         private String accessKeySecret;
         private String bucketName;
+
+        @Override
+        public String toString() {
+            return "BucketConfig{" +
+                    "endpoint='" + endpoint + '\'' +
+                    ", accessKeyId='" + accessKeyId + '\'' +
+                    ", accessKeySecret='" + accessKeySecret + '\'' +
+                    ", bucketName='" + bucketName + '\'' +
+                    '}';
+        }
 
         public String getEndpoint() {
             return endpoint;
