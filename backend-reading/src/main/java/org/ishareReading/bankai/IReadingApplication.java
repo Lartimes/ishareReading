@@ -1,10 +1,11 @@
 package org.ishareReading.bankai;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.reflection.MetaObject;
 import org.ishare.oss.OssProperties;
-import org.ishareReading.bankai.model.BookOpinions;
-import org.ishareReading.bankai.service.BookOpinionsService;
+import org.ishareReading.bankai.schedul.HotRank;
+import org.ishareReading.bankai.utils.BookUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,11 +15,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.math.BigDecimal;
+import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 
 
