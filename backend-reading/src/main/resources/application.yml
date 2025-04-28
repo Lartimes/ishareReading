@@ -19,6 +19,11 @@ spring:
       enabled: true
       max-file-size: 200MB
       max-request-size: 200MB
+#  profiles:
+#    active: devxyx
+    async:
+      # noinspection SpringBootApplicationYaml
+      request-timeout: 300000  # 异步请求超时（单位毫秒）
   application:
     name: back-reading
   datasource:

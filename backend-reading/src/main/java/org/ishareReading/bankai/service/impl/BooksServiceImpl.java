@@ -2,6 +2,7 @@ package org.ishareReading.bankai.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.seg.common.Term;
@@ -20,6 +21,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.ishare.oss.ObjectNameUtil;
 import org.ishare.oss.OssService;
 import org.ishareReading.bankai.constant.BucketConstant;
+import org.ishareReading.bankai.constant.RedisConstant;
 import org.ishareReading.bankai.exception.BusinessException;
 import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.mapper.BookContentPageMapper;
@@ -27,6 +29,7 @@ import org.ishareReading.bankai.mapper.BooksMapper;
 import org.ishareReading.bankai.model.BookContentPage;
 import org.ishareReading.bankai.model.Books;
 import org.ishareReading.bankai.model.Files;
+import org.ishareReading.bankai.model.HotBook;
 import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.BooksService;
 import org.ishareReading.bankai.service.FilesService;
@@ -34,6 +37,8 @@ import org.ishareReading.bankai.utils.BookUtils;
 import org.ishareReading.bankai.utils.FileUtil;
 import org.ishareReading.bankai.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +48,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * <p>
@@ -54,6 +60,8 @@ import java.util.Objects;
  */
 @Service
 public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements BooksService {
+    @Autowired
+    RedisTemplate redisTemplate;
 
     @Autowired
     private OssService ossService;
@@ -83,6 +91,24 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             String text = stripper.getText(pdDocument);
             System.out.println(text);
         }
+    }
+
+    @Override
+    public List<HotBook> getBookHotRank() {
+        final Set<ZSetOperations.TypedTuple<Object>> zSet = redisTemplate.opsForZSet().reverseRangeWithScores(RedisConstant.HOT_BOOK, 0, -1);
+        final ArrayList<HotBook> hotBooks = new ArrayList<>();
+        for (ZSetOperations.TypedTuple<Object> objectTypedTuple : zSet) {
+            final HotBook hotBook;
+            try {
+                hotBook = objectMapper.readValue(objectTypedTuple.getValue().toString(), HotBook.class);
+                hotBook.setHot((double) objectTypedTuple.getScore().intValue());
+                hotBook.hotFormat();
+                hotBooks.add(hotBook);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return hotBooks;
     }
 
     /**
@@ -222,7 +248,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             list.clear();
         }
     }
-
 
     private String removeUselessCharactersByHanLP(String text) {
         List<Term> termList = NLPTokenizer.segment(text);
