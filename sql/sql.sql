@@ -821,4 +821,5 @@ comment on column book_content_page.page is '当前页数（主要内容）只�
 alter table book_content_page
     owner to postgres;
 
-
+-- hstore
+CREATE EXTENSION hstore;

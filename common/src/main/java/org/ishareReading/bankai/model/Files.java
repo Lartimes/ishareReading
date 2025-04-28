@@ -64,4 +64,10 @@ public class Files  extends BaseModel implements Serializable {
     @TableField("is_public")
     private Boolean isPublic;
 
+    /**
+     * 后缀名
+     */
+    @TableField("extension")
+    private String extension;
+
 }

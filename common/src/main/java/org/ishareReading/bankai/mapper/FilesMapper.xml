@@ -10,11 +10,13 @@
         <result column="format" property="format" />
         <result column="type" property="type" />
         <result column="size" property="size" />
+        <result column="extension" property="extension" />
         <result column="user_id" property="userId" />
         <result column="is_public" property="isPublic" />
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />
         <result column="delete_at" property="deleteAt" />
+
     </resultMap>
 
 </mapper>

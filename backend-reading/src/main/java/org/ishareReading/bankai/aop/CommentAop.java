@@ -54,4 +54,35 @@ public class CommentAop {
         throw new BusinessException(ResponseCode.SERVER_ERROR);
     }
 
+    public Response delComment(Map<String, String> map) {
+        String type = map.get("type");
+        Map<String, CommentInterface> beansOfType = applicationContext.getBeansOfType(CommentInterface.class);
+        if (beansOfType.isEmpty()) {
+            throw new BusinessException(ResponseCode.SERVER_ERROR);
+        }
+
+        Collection<CommentInterface> values = beansOfType.values();
+        for (CommentInterface commentInterface : values) {
+            if (commentInterface.getType().equals(type)) {
+                return commentInterface.deleteComment(map);
+            }
+        }
+        throw new BusinessException(ResponseCode.SERVER_ERROR);
+    }
+
+    public Response getComment(Map<String, String> map) {
+         String type = map.get("type");
+        Map<String, CommentInterface> beansOfType = applicationContext.getBeansOfType(CommentInterface.class);
+        if (beansOfType.isEmpty()) {
+            throw new BusinessException(ResponseCode.SERVER_ERROR);
+        }
+
+        Collection<CommentInterface> values = beansOfType.values();
+        for (CommentInterface commentInterface : values) {
+            if (commentInterface.getType().equals(type)) {
+                return commentInterface.getComment(map);
+            }
+        }
+        throw new BusinessException(ResponseCode.SERVER_ERROR);
+    }
 }

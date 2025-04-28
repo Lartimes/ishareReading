@@ -2,16 +2,21 @@ package org.ishareReading.bankai.config;
 
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.core.injector.ISqlInjector;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.AutoMappingBehavior;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.ishareReading.bankai.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 
 @Configuration
 public class MyBatisConfig {
@@ -20,13 +25,52 @@ public class MyBatisConfig {
         return new SqlInjector();
     }
 
+    @Bean
+    public MetaObjectHandler metaObjectHandler() {
+        return new MetaObjectHandler() {
+            @Override
+            public void insertFill(MetaObject metaObject) {
+                this.strictInsertFill(metaObject, "createAt", LocalDateTime.class, LocalDateTime.now());
+                this.strictInsertFill(metaObject, "updateAt", LocalDateTime.class, LocalDateTime.now());
+            }
+
+            @Override
+            public void updateFill(MetaObject metaObject) {
+                this.strictUpdateFill(metaObject, "updateAt", LocalDateTime.class, LocalDateTime.now());
+            }
+        };
+    }
 
     @Bean
-    public GlobalConfig globalConfig(@Qualifier("sqlInjector") ISqlInjector sqlInjector) {
+    public GlobalConfig globalConfig(@Qualifier("sqlInjector") ISqlInjector sqlInjector,
+                                     MetaObjectHandler metaObjectHandler) {
         GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setSqlInjector(sqlInjector);
+        globalConfig.setMetaObjectHandler(metaObjectHandler);
+        globalConfig.setIdentifierGenerator(idGenerator());
         return globalConfig;
     }
+
+    @Bean
+    public IdentifierGenerator idGenerator() {
+        return entity -> IdUtil.getId();
+    }
+
+//    @Bean("sqlSessionFactory")
+//    @Primary
+//    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
+//        SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
+//        sessionFactory.setDataSource(dataSource);
+//        sessionFactory.setTypeHandlers(new MapTypeHandler());
+//        sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:org/ishareReading/bankai/mapper/*.xml"));
+//        MybatisConfiguration configuration = new MybatisConfiguration();
+//        configuration.setMapUnderscoreToCamelCase(true);
+//        configuration.setUseGeneratedKeys(true);
+//        configuration.setAutoMappingBehavior(AutoMappingBehavior.FULL);
+//        sessionFactory.setConfiguration(configuration);
+//        return sessionFactory.getObject();
+//    }
+
 
     @Bean("batchSqlSessionFactory")
     public SqlSessionFactory batchSqlSessionFactory(@Qualifier("globalConfig") GlobalConfig globalConfig,
@@ -38,7 +82,7 @@ public class MyBatisConfig {
         sqlSessionFactory.setMapperLocations(resolver.getResources("classpath:org/ishareReading/bankai/mapper/*.xml"));
         MybatisConfiguration configuration = new MybatisConfiguration();
         configuration.setMapUnderscoreToCamelCase(true);
-        configuration.setUseGeneratedKeys(true);
+        configuration.setUseGeneratedKeys(false);
         configuration.setAutoMappingBehavior(AutoMappingBehavior.FULL);
         sqlSessionFactory.setConfiguration(configuration);
         return sqlSessionFactory.getObject();

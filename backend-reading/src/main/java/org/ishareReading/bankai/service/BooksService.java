@@ -1,10 +1,12 @@
 package org.ishareReading.bankai.service;
 
+import lombok.SneakyThrows;
 import org.ishareReading.bankai.model.Books;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.ishareReading.bankai.model.HotBook;
+import org.ishareReading.bankai.response.Response;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.print.Book;
 import java.util.List;
 
 /**
@@ -18,4 +20,13 @@ import java.util.List;
 public interface BooksService extends IService<Books> {
 
     List<HotBook> getBookHotRank();
+
+
+    @SneakyThrows
+    Response uploadOrUpdateBook(Books books);
+
+    Response getMetadata(MultipartFile file);
+
+    void insertContestPages(Long fileId , Integer pages);
+
 }

@@ -9,26 +9,26 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Aspect
 @Component
 public class CommentMapperAop {
 
-    @Pointcut("execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.update(..)) || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.updateById(..))")
+    @Pointcut("execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) || execution(* com.baomidou.mybatisplus.extension.service.IService.saveBatch(..)) || execution(* com.baomidou.mybatisplus.extension.service.IService.save(..)) || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.updateById(..)) || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.update(..))")
     public void dbOperation() {
     }
 
     @Before("dbOperation()")
     public void beforeDbOperation(JoinPoint joinPoint) {
+
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         if (args.length == 0) {
             return;
         }
 
-        if ("insert".equals(methodName) || "saveBatch".equals(methodName)) {
+        if ("insert".equals(methodName) || "saveBatch".equals(methodName) || "save".equals(methodName)) {
             handleInsert(args);
         } else if (methodName.startsWith("update")) {
             handleUpdate(args);
@@ -59,7 +59,7 @@ public class CommentMapperAop {
             }
 
             if (arg instanceof UpdateWrapper<?> updateWrapper) {
-                updateWrapper.set("update_at", LocalDateTime.now());
+                updateWrapper.set("update_at", System.currentTimeMillis());
             } else if (arg instanceof Collection<?>) {
                 for (Object item : (Collection<?>) arg) {
                     injectUpdateFields(item);
@@ -72,10 +72,11 @@ public class CommentMapperAop {
 
     private void injectCreateAndUpdateFields(Object entity) {
         if (entity == null) return;
-        LocalDateTime now = LocalDateTime.now();
+        long now = System.currentTimeMillis();
         try {
             Field createTimeField = getField(entity.getClass(), "createAt");
             Field updateTimeField = getField(entity.getClass(), "updateAt");
+
             if (createTimeField != null) {
                 createTimeField.setAccessible(true);
                 createTimeField.set(entity, now);
@@ -92,7 +93,7 @@ public class CommentMapperAop {
 
     private void injectUpdateFields(Object entity) {
         if (entity == null) return;
-        LocalDateTime now = LocalDateTime.now();
+        long now = System.currentTimeMillis();
         try {
             Field updateTimeField = getField(entity.getClass(), "updateAt");
             if (updateTimeField != null) {
@@ -105,18 +106,12 @@ public class CommentMapperAop {
     }
 
     private Field getField(Class<?> clazz, String fieldName) {
-        Class<?> current = clazz;
-        while (current != null && current != Object.class) {
-            try {
-                return current.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                // 往父类找
-                current = current.getSuperclass();
-            }
+        try {
+            return clazz.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            return null;
         }
-        return null;
     }
-
 
 }
 
