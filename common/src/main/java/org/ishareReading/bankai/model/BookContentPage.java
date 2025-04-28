@@ -10,8 +10,8 @@ import java.io.Serializable;
 @Getter
 @Setter
 @TableName("book_content_page")
-public class BookContentPage  extends BaseModel implements Serializable {
-//    id, book_id, content, pdf_page_stream , page,
+public class BookContentPage extends BaseModel implements Serializable {
+    //    id, book_id, content, pdf_page_stream , page,
 //    create_at, update_at, delete_at
     private static final long serialVersionUID = 1L;
 
@@ -22,9 +22,9 @@ public class BookContentPage  extends BaseModel implements Serializable {
     @TableField("content")
     private String content;
 
-//    实际上转了img
-    @TableField(value = "pdf_page_stream" ,exist = false)
-    private byte[]  pdfPageStream;
+    //    实际上转了img
+    @TableField(value = "pdf_page_stream", exist = false)
+    private byte[] pdfPageStream;
     @TableField("page")
     private Integer page;
 }

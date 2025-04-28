@@ -1,11 +1,23 @@
-spring:
-  profiles:
-    active: devxyx
-
+server:
+  port: 8080
   servlet:
-    async:
-      # noinspection SpringBootApplicationYaml
-      request-timeout: 300000  # 异步请求超时（单位毫秒）
+    context-path: /ishareReading
+  # 添加Tomcat异步请求配置
+  tomcat:
+    threads:
+      max: 200 # 最大工作线程数
+    connection-timeout: 20000 # 连接超时毫秒
+    max-connections: 10000 # 最大连接数
+    accept-count: 100 # 等待队列长度
+    # 异步请求相关设置
+    async-timeout: 300000 # 异步请求超时时间 5分钟
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
   application:
     name: back-reading
   datasource:
@@ -43,22 +55,6 @@ spring:
     allow-circular-references: true
 
 
-
-server:
-  port: 8080
-  servlet:
-    context-path: /ishareReading
-  # 添加Tomcat异步请求配置
-  tomcat:
-    threads:
-      max: 200 # 最大工作线程数
-    connection-timeout: 20000 # 连接超时毫秒
-    max-connections: 10000 # 最大连接数
-    accept-count: 100 # 等待队列长度
-
-
-
-
 #阿里云OSS配置
 aliyun:
   oss:
@@ -68,8 +64,7 @@ aliyun:
         accessKeyId: LTAI5tRubA1tFPH7RMeSUAPt
         accessKeySecret: ClNjKHKk2BYncyzLg4aJFck1YZyAdy
         bucketName: bankai
-
 jwt:
   config:
     secret: "xyx8BDbRigUDaY6pZFfWus2jZWLPHO"
-    expire: 864000000000
+    expire: 8640000000000

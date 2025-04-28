@@ -77,7 +77,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     private final BookOpinionsService bookOpinionsService;
     private final RedisCacheUtil redisCacheUtil;
 
-    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService, RedisCacheUtil redisCacheUtil) {
+    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService, RedisCacheUtil redisCacheUtil, RedisCacheUtil redisCacheUtil1) {
         this.ossService = ossService;
         this.redisTemplate = redisTemplate;
         this.filesService = filesService;
@@ -88,6 +88,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         this.sqlSession = sqlSession;
         this.bookUnderlineCoordinatesService = bookUnderlineCoordinatesService;
         this.bookOpinionsService = bookOpinionsService;
+        this.redisCacheUtil = redisCacheUtil1;
     }
 
     public static void main(String[] args) throws Exception {
@@ -154,6 +155,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         }).start();
         return Response.success("添加成功");
     }
+
 
     /**
      * pdfbox 读取pdf获取元数据？？？ 且上传
@@ -240,6 +242,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                 return;
             }
 
+
             bookContentPageMapper.delete(new LambdaQueryWrapper<BookContentPage>()
                     .eq(BookContentPage::getBookId, fileId)); //先删除所有
             PDFTextStripper stripper = new PDFTextStripper();
@@ -262,6 +265,8 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                 bookContentPage.setBookId(fileId);
                 bookContentPage.setPage(page);
                 bookContentPage.setContent(pageContent);
+                PDPage pdPage = pdDocument.getPage(page -1);
+                bookContentPage.setPdfPageStream(getStreamByPage(pdPage));
                 list.add(bookContentPage);
                 if (list.size() % 50 == 0) {
                     mapper.insertBatchSomeColumn(list);
@@ -272,6 +277,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             list.clear();
         }
     }
+
 
     /**
      * 根据书籍ID 获取书籍门户首页信息 * 这里先SQL ， 后期接入ES *  bookinfo *  封面 *  当个书籍的热门评论
@@ -427,6 +433,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     private String generateSummary(String text) {
         // 使用 HanLP 生成摘要
         List<String> phraseList = HanLP.extractPhrase(text, 10);
+        System.out.println(phraseList);
         StringBuilder summary = new StringBuilder();
         for (String sentence : phraseList) {
             summary.append(sentence).append(" ");

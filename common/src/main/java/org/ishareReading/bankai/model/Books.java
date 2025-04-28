@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.ishareReading.bankai.config.MapTypeHandler;
+import org.ishareReading.bankai.config.MapTypeHandler;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

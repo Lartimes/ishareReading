@@ -20,15 +20,13 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.io.InputStream;
 import java.time.LocalDateTime;
-
 
 
 @EnableConfigurationProperties({OssProperties.class})
 @ComponentScan(basePackages = {"org.ishare.oss", "org.ishareReading.bankai"})
 @MapperScan(basePackages = {"org.ishareReading.bankai.mapper"})
-@SpringBootApplication(scanBasePackages = {"org.ishareReading" ,"org.ishare" })
+@SpringBootApplication(scanBasePackages = {"org.ishareReading", "org.ishare"})
 @EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class IReadingApplication implements CommandLineRunner {
