@@ -2,26 +2,23 @@ package org.ishareReading.bankai.controller;
 
 import org.ishareReading.bankai.aop.CommentAop;
 import org.ishareReading.bankai.response.Response;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.ishareReading.bankai.service.BooksService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * type相关 首页相关 通用的？？？ 还有那些？？ 需要想一下
+ */
 @RestController
 @RequestMapping("/index")
 public class IndexController {
-    @Autowired
-    BooksService booksService;
-
+    private final BooksService booksService;
     private final CommentAop commentAop;
 
-    public IndexController(CommentAop commentAop) {
+    public IndexController(CommentAop commentAop, BooksService booksService) {
         this.commentAop = commentAop;
+        this.booksService = booksService;
     }
 
     /**
@@ -29,7 +26,7 @@ public class IndexController {
      *
      * @return
      */
-    @PostMapping("/addComment")
+    @PostMapping("/getComments")
     public Response comment(@RequestBody Map<String, String> map) {
         return commentAop.getComment(map);
         }
@@ -39,7 +36,7 @@ public class IndexController {
      * @return
      */
     @GetMapping("/book/hot/rank")
-    public Response listBookHotRank(){
+    public Response listBookHotRank() {
         return Response.success(booksService.getBookHotRank());
     }
 }

@@ -22,6 +22,7 @@ public class BookContentPage  extends BaseModel implements Serializable {
     @TableField("content")
     private String content;
 
+//    实际上转了img
     @TableField(value = "pdf_page_stream" ,exist = false)
     private byte[]  pdfPageStream;
     @TableField("page")

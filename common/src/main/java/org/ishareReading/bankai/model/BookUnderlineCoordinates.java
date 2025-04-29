@@ -23,6 +23,7 @@ public class BookUnderlineCoordinates extends BaseModel implements Serializable 
 
     private static final long serialVersionUID = 1L;
 
+    private String content;
 
     /**
      * 书籍id
