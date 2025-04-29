@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.reflection.MetaObject;
 import org.ishare.oss.OssProperties;
 import org.ishareReading.bankai.schedul.HotRank;
+import org.ishareReading.bankai.service.BookOpinionsService;
 import org.ishareReading.bankai.utils.BookUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class IReadingApplication implements CommandLineRunner {
     private BookUtils bookUtils;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private BookOpinionsService bookOpinionsService;
 
     @Autowired
     private HotRank hotRank;
@@ -51,6 +54,7 @@ public class IReadingApplication implements CommandLineRunner {
         InputStream inputStream = springAiResource.getInputStream();
         Object metadata = bookUtils.getMetadata(inputStream.readAllBytes());
         System.out.println(metadata);
+          hotRank.bookHotRank();
     }
 
     @Bean

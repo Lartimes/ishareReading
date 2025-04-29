@@ -9,6 +9,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 /**
@@ -28,14 +29,13 @@ public class CommonMapperAop {
 
     @Before("dbOperation()")
     public void beforeDbOperation(JoinPoint joinPoint) {
-
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         if (args.length == 0) {
             return;
         }
 
-        if ("insert".equals(methodName) || "saveBatch".equals(methodName) || "save".equals(methodName)) {
+        if ("insert".equals(methodName) || "saveBatch".equals(methodName)) {
             handleInsert(args);
         } else if (methodName.startsWith("update")) {
             handleUpdate(args);
@@ -66,7 +66,7 @@ public class CommonMapperAop {
             }
 
             if (arg instanceof UpdateWrapper<?> updateWrapper) {
-                updateWrapper.set("update_at", System.currentTimeMillis());
+                updateWrapper.set("update_at", LocalDateTime.now());
             } else if (arg instanceof Collection<?>) {
                 for (Object item : (Collection<?>) arg) {
                     injectUpdateFields(item);
@@ -79,11 +79,10 @@ public class CommonMapperAop {
 
     private void injectCreateAndUpdateFields(Object entity) {
         if (entity == null) return;
-        long now = System.currentTimeMillis();
+        LocalDateTime now = LocalDateTime.now();
         try {
             Field createTimeField = getField(entity.getClass(), "createAt");
             Field updateTimeField = getField(entity.getClass(), "updateAt");
-
             if (createTimeField != null) {
                 createTimeField.setAccessible(true);
                 createTimeField.set(entity, now);
@@ -100,7 +99,7 @@ public class CommonMapperAop {
 
     private void injectUpdateFields(Object entity) {
         if (entity == null) return;
-        long now = System.currentTimeMillis();
+        LocalDateTime now = LocalDateTime.now();
         try {
             Field updateTimeField = getField(entity.getClass(), "updateAt");
             if (updateTimeField != null) {
@@ -113,11 +112,16 @@ public class CommonMapperAop {
     }
 
     private Field getField(Class<?> clazz, String fieldName) {
-        try {
-            return clazz.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException e) {
-            return null;
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            try {
+                return current.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                // 往父类找
+                current = current.getSuperclass();
+            }
         }
+        return null;
     }
 
 }
