@@ -12,11 +12,18 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
+/**
+ * 通用mapper控制
+ */
 @Aspect
 @Component
-public class CommentMapperAop {
+public class CommonMapperAop {
 
-    @Pointcut("execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.update(..)) || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.updateById(..))")
+    @Pointcut("execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) " +
+            "|| execution(* com.baomidou.mybatisplus.extension.service.IService.saveBatch(..)) ||" +
+            " execution(* com.baomidou.mybatisplus.extension.service.IService.save(..)) ||" +
+            " execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.updateById(..)) ||" +
+            " execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.update(..))")
     public void dbOperation() {
     }
 
@@ -116,7 +123,6 @@ public class CommentMapperAop {
         }
         return null;
     }
-
 
 }
 

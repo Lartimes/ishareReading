@@ -9,7 +9,6 @@
         <result column="user_id" property="userId" />
         <result column="note_name" property="noteName" />
         <result column="note_content" property="noteContent" />
-        <result column="file_id" property="fileId" />
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />
         <result column="delete_at" property="deleteAt" />

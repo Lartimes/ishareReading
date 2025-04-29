@@ -1,11 +1,15 @@
 package org.ishareReading.bankai.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.ishareReading.bankai.holder.UserHolder;
+import org.ishareReading.bankai.model.BookUnderlineCoordinates;
 import org.ishareReading.bankai.model.Books;
 import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.BooksService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/book")
@@ -36,8 +40,50 @@ public class BookController {
     }
 
     /**
+     * 根据isbn获取图书
+     *
+     * @param isbn
+     *
+     * @return
+     */
+    @GetMapping("/getBooksByIsbn")
+    public Response getBookById(@RequestParam("isbn") Long isbn) {
+        Books one = booksService.getOne(new LambdaQueryWrapper<Books>()
+                .eq(Books::getIsbn, isbn)
+                .last("limit 1"));
+        return Response.success(one);
+    }
+
+    /**
+     * 点击书籍获取书籍首页门户 ？？ 这里先SQL ， 后期接入ES bookinfo 首页 封面 当个书籍的热门评论 =======================
+     *  todo 接入 AI鉴赏，点评？？？
+     *
+     * @param id
+     *
+     * @return
+     */
+    @GetMapping("/getBooksHomePageById")
+    public Response getBookHomePageById(@RequestParam("id") Long id) {
+        return Response.success(booksService.getBooksInfoById(id));
+    }
+
+    /**
+     * 阅读模式获取书籍当页信息
+     * @param map
+     * @return
+     */
+    @PostMapping("/getBooksImgByPage")
+    public Response getBooksInfoByPage(@RequestBody Map<String, String> map) {
+        Long bookId = Long.valueOf(map.get("bookId"));
+        Integer pageNum = Integer.valueOf(map.get("pageNum"));
+        return Response.success(booksService.getBooksInfoReadingModeById(bookId, pageNum, UserHolder.get()));
+    }
+
+    /**
      * 上传图书自动获取元属性信息
+     *
      * @param file
+     *
      * @return
      */
     @PostMapping("/getBooksMetadata")
@@ -48,5 +94,19 @@ public class BookController {
 //        保存封面和书籍
         return booksService.getMetadata(file);
     }
+
+    /**
+     * 添加标注
+     * @param bookUnderlineCoordinates
+     * @return
+     */
+    @PostMapping("/markBook")
+//    content
+    public Response markBook(@RequestBody BookUnderlineCoordinates  bookUnderlineCoordinates) {
+        booksService.markBook(bookUnderlineCoordinates);
+        return Response.success("发布成功");
+    }
+
+
 
 }

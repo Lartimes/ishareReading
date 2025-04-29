@@ -47,10 +47,5 @@ public class Notebooks  extends BaseModel implements Serializable {
     @TableField("note_content")
     private String noteContent;
 
-    /**
-     * 文件表id
-     */
-    @TableField("file_id")
-    private Long fileId;
 
 }

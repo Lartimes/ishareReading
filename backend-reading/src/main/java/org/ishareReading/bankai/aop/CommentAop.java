@@ -71,7 +71,7 @@ public class CommentAop {
     }
 
     public Response getComment(Map<String, String> map) {
-         String type = map.get("type");
+        String type = map.get("type");
         Map<String, CommentInterface> beansOfType = applicationContext.getBeansOfType(CommentInterface.class);
         if (beansOfType.isEmpty()) {
             throw new BusinessException(ResponseCode.SERVER_ERROR);

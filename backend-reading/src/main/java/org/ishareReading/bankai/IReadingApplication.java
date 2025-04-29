@@ -1,36 +1,44 @@
 package org.ishareReading.bankai;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.reflection.MetaObject;
 import org.ishare.oss.OssProperties;
-import org.ishareReading.bankai.holder.UserHolder;
-import org.ishareReading.bankai.model.BookOpinions;
-import org.ishareReading.bankai.model.Books;
 import org.ishareReading.bankai.schedul.HotRank;
 import org.ishareReading.bankai.service.BookOpinionsService;
-import org.ishareReading.bankai.service.BooksService;
+import org.ishareReading.bankai.utils.BookUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.math.BigDecimal;
+import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 
-@SpringBootApplication
-@EnableConfigurationProperties(OssProperties.class)
-@MapperScan(basePackages = {"org.ishareReading.bankai.mapper"})
+
+@EnableConfigurationProperties({OssProperties.class})
 @ComponentScan(basePackages = {"org.ishare.oss", "org.ishareReading.bankai"})
+@MapperScan(basePackages = {"org.ishareReading.bankai.mapper"})
+@SpringBootApplication(scanBasePackages = {"org.ishareReading" ,"org.ishare" })
 @EnableScheduling
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class IReadingApplication implements CommandLineRunner {
 
+    @Value("classpath:/a.pdf")
+    private Resource springAiResource;
+    @Autowired
+    private BookUtils bookUtils;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private BookOpinionsService bookOpinionsService;
 
@@ -43,7 +51,10 @@ public class IReadingApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        hotRank.bookHotRank();
+        InputStream inputStream = springAiResource.getInputStream();
+        Object metadata = bookUtils.getMetadata(inputStream.readAllBytes());
+        System.out.println(metadata);
+          hotRank.bookHotRank();
     }
 
     @Bean

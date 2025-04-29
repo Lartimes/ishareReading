@@ -249,11 +249,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         }
     }
 
-    @Override
-    public List<Books> getRecentlyReleaseBook() {
-        return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
-    }
-
     private String removeUselessCharactersByHanLP(String text) {
         List<Term> termList = NLPTokenizer.segment(text);
         StringBuilder result = new StringBuilder();
