@@ -60,4 +60,5 @@ public interface BooksService extends IService<Books> {
     record BooksInfoReadingMode(Books books, String imgBase64, int pageNum, List<BookOpinions> infoList) {
     }
 
+    List<Books> getRecentlyReleaseBook();
 }

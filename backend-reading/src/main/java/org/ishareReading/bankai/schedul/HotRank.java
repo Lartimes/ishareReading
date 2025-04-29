@@ -154,17 +154,6 @@ public class HotRank {
 //    }
 
 
-    // TODO
-    // 热门作者
-    @Scheduled(cron = "0 0 */3 * * ?")
-    public void hotAuthor(){
-        Set<String> keys = redisTemplate.keys(RedisConstant.AUTHOR_FANS);
-        for (String key : keys) {
-            // 获取该用户关注的所有作者
-            Long count = redisTemplate.opsForZSet().count(key, 0, -1);
-
-        }
-    }
 
 
 }
