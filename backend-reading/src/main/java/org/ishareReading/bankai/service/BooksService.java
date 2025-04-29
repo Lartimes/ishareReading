@@ -29,4 +29,5 @@ public interface BooksService extends IService<Books> {
 
     void insertContestPages(Long fileId , Integer pages);
 
+    List<Books> getRecentlyReleaseBook();
 }

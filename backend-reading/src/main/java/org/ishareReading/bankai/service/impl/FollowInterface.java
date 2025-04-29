@@ -193,6 +193,8 @@ class AuthorFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing>
             final Date date = new Date();
             redisTemplate.opsForZSet().add(RedisConstant.AUTHOR_FOLLOW + userId, followId, date.getTime());
             redisTemplate.opsForZSet().add(RedisConstant.AUTHOR_FANS + followId, userId, date.getTime());
+            //  同步增加总榜上的粉丝数
+            redisTemplate.opsForZSet().incrementScore(RedisConstant.AUTHOR_FANS_COUNT, id, 1);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }
@@ -206,6 +208,7 @@ class AuthorFollowService extends ServiceImpl<UserFollowingMapper,UserFollowing>
             remove(new LambdaQueryWrapper<UserFollowing>().eq(UserFollowing::getUserId, userId).eq(UserFollowing::getFollowId,id).eq(UserFollowing::getType,type));
             redisTemplate.opsForZSet().remove(RedisConstant.AUTHOR_FOLLOW + id, userId);
             redisTemplate.opsForZSet().remove(RedisConstant.AUTHOR_FANS + userId, id);
+            redisTemplate.opsForZSet().incrementScore(RedisConstant.AUTHOR_FANS_COUNT, id, -1);
         } catch (Exception e) {
             throw new BaseException(e.getMessage());
         }

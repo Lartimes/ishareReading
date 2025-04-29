@@ -37,4 +37,5 @@ public interface RedisConstant {
     String LIKE_LISTENER = "like:listener:";
 
     String HOT_BOOK = "hot:book";
+    String AUTHOR_FANS_COUNT = "author:fans:count";
 }
