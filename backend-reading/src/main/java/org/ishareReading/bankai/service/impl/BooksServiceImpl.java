@@ -65,7 +65,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
 
     private final OssService ossService;
     private final FilesService filesService;
-    private final BooksService booksService;
     private final OssService osService;
     private final BookContentPageMapper bookContentPageMapper;
 
@@ -75,11 +74,10 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     private final BookUnderlineCoordinatesService bookUnderlineCoordinatesService;
     private final BookOpinionsService bookOpinionsService;
 
-    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, BooksService booksService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService) {
+    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService) {
         this.ossService = ossService;
         this.redisTemplate = redisTemplate;
         this.filesService = filesService;
-        this.booksService = booksService;
         this.osService = osService;
         this.bookContentPageMapper = bookContentPageMapper;
         this.bookUtils = bookUtils;
@@ -129,12 +127,12 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @SneakyThrows
     @Override
     public Response uploadOrUpdateBook(Books books) {
-        boolean b = booksService.save(books);
+        boolean b = this.save(books);
         new Thread(() -> {
 //            ByteArrayInputStream pdfContent = new ByteArrayInputStream(bytes);
             //TODO 异步进行数据内容处理？？、
             if (b) {
-                booksService.insertContestPages(books.getFileId(), books.getTotalPages());
+                this.insertContestPages(books.getFileId(), books.getTotalPages());
             }
         }).start();
         return Response.success("添加成功");
@@ -303,7 +301,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
 //    用户标注
     @Override
     public BooksInfoReadingMode getBooksInfoReadingModeById(Long id, Integer pageNumber, Long userId) {
-        Books book = booksService.getById(id);
+        Books book = this.getById(id);
         BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
                 .eq(BookContentPage::getBookId, id)
                 .eq(BookContentPage::getPage, pageNumber));

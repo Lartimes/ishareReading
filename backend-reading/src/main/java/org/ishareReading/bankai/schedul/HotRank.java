@@ -6,20 +6,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ishareReading.bankai.constant.RedisConstant;
 import org.ishareReading.bankai.model.Books;
 import org.ishareReading.bankai.model.HotBook;
 import org.ishareReading.bankai.service.BooksService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-import org.ishareReading.bankai.constant.RedisConstant;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  * @descripetion:热度排行榜
@@ -32,10 +33,13 @@ public class HotRank {
     Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
     ObjectMapper om = new ObjectMapper();
 
-    @Autowired
-    private BooksService booksService;
-    @Autowired
-    private RedisTemplate redisTemplate;
+    private final BooksService booksService;
+    private final RedisTemplate redisTemplate;
+
+    public HotRank(BooksService booksService, RedisTemplate redisTemplate) {
+        this.booksService = booksService;
+        this.redisTemplate = redisTemplate;
+    }
 
 
     // 书本热度排行榜
@@ -75,7 +79,7 @@ public class HotRank {
                     topK.add(hotVideo);
                 }
             });
-            id = books.get(books.size() - 1).getId();
+            id = books.getLast().getId();
             books = booksService.list(new LambdaQueryWrapper<Books>()
                     .select(Books::getId, Books::getAuthor,Books::getGenre,
                             Books::getCoverImageId,Books::getAverageRating,Books::getRatingCount,Books::getViewCount,
@@ -90,7 +94,7 @@ public class HotRank {
         if(ObjectUtils.isEmpty(hotBooks)){
             return;
         }
-        Double minHot = hotBooks.get(0).getHot();
+        Double minHot = hotBooks.getFirst().getHot();
 
         redisTemplate.opsForZSet().removeRange(RedisConstant.HOT_BOOK, 0,-1);
 

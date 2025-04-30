@@ -17,14 +17,12 @@ import org.ishareReading.bankai.model.TocItem;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Component
 public class BookUtils {
 
     private static final int MAX_LEVEL = 3;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @SneakyThrows
     public Object getMetadata(byte[] bytes) {
@@ -36,10 +34,8 @@ public class BookUtils {
             String title = documentInformation.getTitle();
             Date time = documentInformation.getCreationDate().getTime();
             int year = time.getYear();
-            String createTime = DATE_FORMAT.format(time);
             PDDocumentCatalog documentCatalog = pdDocument.getDocumentCatalog();
             String language = documentCatalog.getLanguage();
-            System.out.println(language);
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(pdDocument);
 
@@ -120,9 +116,9 @@ public class BookUtils {
 //        description
 //        total_pages
 //        language
-    public    record MetaData(String author, String pages, String description, String isbn,
-                    String publisher, Integer publishDate, String title,
-                    String language, String bookMarks) {
+    public record MetaData(String author, String pages, String description, String isbn,
+                           String publisher, Integer publishDate, String title,
+                           String language, String bookMarks) {
 
     }
 

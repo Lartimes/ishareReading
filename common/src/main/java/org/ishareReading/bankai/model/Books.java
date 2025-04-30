@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.ishareReading.bankai.config.MapTypeHandler;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @TableName("books")
+@ToString
 public class Books extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;

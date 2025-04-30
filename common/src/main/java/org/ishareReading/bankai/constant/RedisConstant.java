@@ -2,6 +2,9 @@ package org.ishareReading.bankai.constant;
 
 public interface RedisConstant {
 
+//    用户模型的key
+    String USER_MODEL = "user:model:";
+
     String CAPTCHA = "captcha:";
 
 
