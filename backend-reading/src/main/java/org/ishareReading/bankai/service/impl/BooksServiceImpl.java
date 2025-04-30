@@ -99,6 +99,12 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         }
     }
 
+
+    @Override
+    public List<Books> getRecentlyReleaseBook() {
+        return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
+    }
+
     @Override
     public List<HotBook> getBookHotRank() {
         final Set<ZSetOperations.TypedTuple<Object>> zSet = redisTemplate.opsForZSet().reverseRangeWithScores(RedisConstant.HOT_BOOK, 0, -1);
@@ -350,10 +356,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         bookOpinionsService.save(bookOpinions);
     }
 
-    @Override
-    public List<Books> getRecentlyReleaseBook() {
-        return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
-    }
+
 
     @SneakyThrows
     private byte[] getStreamByPage(PDPage pdPage) {

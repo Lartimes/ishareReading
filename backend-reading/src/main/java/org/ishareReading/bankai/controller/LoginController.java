@@ -62,13 +62,7 @@ public class LoginController {
         return Response.success("发送成功,请耐心等待");
     }
 
-    /**
-     * @param email
-     * @param captchaCode
-     *
-     * @return
-     */
-    @PostMapping("/check")
+
     public Response check(@RequestParam("email") String email,
                           @RequestParam("code") String captchaCode) {
         if (email == null || captchaCode == null) {
@@ -99,8 +93,16 @@ public class LoginController {
      * @return
      */
     @PostMapping("/register")
-    public Response register(@RequestBody Users users) {
-        if (!loginService.register(users)) {
+    public Response register(@RequestBody Map<String, Object> map) {
+        String emailCode = (String) map.get("emailCode");
+        Users user = new Users();
+
+        Map<String, Object> userMap = (Map<String, Object>) map.get("user");
+        user.setUserName((String) userMap.get("userName"));
+        user.setEmail((String) userMap.get("email"));
+        user.setPassword((String) userMap.get("password"));
+        check(user.getEmail(),emailCode);
+        if (!loginService.register(user)) {
             return Response.fail("注册失败,验证码错误");
         }
         return Response.success("注册成功");
