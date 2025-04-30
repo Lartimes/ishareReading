@@ -35,13 +35,20 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
 
-        String[] url = {"http://0.0.0.0:3000"};
+//        String[] url = {"http://0.0.0.0:3000"};
+//
+//        registry.addMapping("/**")
+//                .allowedOrigins(url)
+//                .allowCredentials(true)
+//                .allowedMethods("*")   // 允许跨域的方法，可以单独配置
+//                .allowedHeaders("*");  // 允许跨域的请求头，可以单独配置;
 
-        registry.addMapping("/**")
-                .allowedOrigins(url)
-                .allowCredentials(true)
-                .allowedMethods("*")   // 允许跨域的方法，可以单独配置
-                .allowedHeaders("*");  // 允许跨域的请求头，可以单独配置;
+        registry.addMapping("/**") // 所有路径
+                .allowedOrigins("*") // 允许的前端地址
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(false)
+                .maxAge(3600);
     }
 
 

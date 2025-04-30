@@ -32,8 +32,14 @@ public class HotRank {
     Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
     ObjectMapper om = new ObjectMapper();
 
-    @Autowired
+
     private BooksService booksService;
+
+    @Autowired
+    public void setBooksService(BooksService booksService) {
+        this.booksService = booksService;
+    }
+
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -61,6 +67,9 @@ public class HotRank {
 
                 // 热度公式
                 final double v = weightRandom();
+                if(book.getViewCount() == null){
+                    return;
+                }
                 double heatScore =
                         0.3 * book.getViewCount() +
                                 0.4 * book.getDownloadCount() +
