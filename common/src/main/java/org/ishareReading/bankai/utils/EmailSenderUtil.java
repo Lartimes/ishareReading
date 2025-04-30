@@ -48,9 +48,9 @@ public class EmailSenderUtil {
     public void sentTo(String email, String sixCode) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(fromEmail, "Tiktok");
+        helper.setFrom(fromEmail, "ishareBooks");
         helper.setTo(email);
-        helper.setSubject("Tiktok邮箱验证码");
+        helper.setSubject("ishareBooks邮箱验证码");
         String format = String.format(HTML_CONTENT, sixCode, minutes);
         helper.setText(format, true);
         javaMailSender.send(message);
