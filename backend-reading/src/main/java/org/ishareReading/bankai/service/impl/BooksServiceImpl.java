@@ -26,10 +26,7 @@ import org.ishareReading.bankai.exception.BusinessException;
 import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.mapper.BookContentPageMapper;
 import org.ishareReading.bankai.mapper.BooksMapper;
-import org.ishareReading.bankai.model.BookContentPage;
-import org.ishareReading.bankai.model.Books;
-import org.ishareReading.bankai.model.Files;
-import org.ishareReading.bankai.model.HotBook;
+import org.ishareReading.bankai.model.*;
 import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.BooksService;
 import org.ishareReading.bankai.service.FilesService;
@@ -91,6 +88,12 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             String text = stripper.getText(pdDocument);
             System.out.println(text);
         }
+    }
+
+
+    @Override
+    public List<Books> getRecentlyReleaseBook() {
+        return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
     }
 
     @Override
@@ -248,6 +251,22 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             list.clear();
         }
     }
+
+    @Override
+    public BooksInfoHomePage getBooksInfoById(Long id) {
+        return null;
+    }
+
+    @Override
+    public BooksInfoReadingMode getBooksInfoReadingModeById(Long id, Integer pageNumber, Long userId) {
+        return null;
+    }
+
+    @Override
+    public void markBook(BookUnderlineCoordinates bookUnderlineCoordinates) {
+
+    }
+
 
     private String removeUselessCharactersByHanLP(String text) {
         List<Term> termList = NLPTokenizer.segment(text);

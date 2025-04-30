@@ -61,6 +61,11 @@ public class HotRank {
 
                 // 热度公式
                 final double v = weightRandom();
+                if(book.getViewCount() == null || book.getDownloadCount() == null || book.getAverageRating() == null || book.getRatingCount() == null){
+                    return;
+                }
+
+
                 double heatScore =
                         0.3 * book.getViewCount() +
                                 0.4 * book.getDownloadCount() +

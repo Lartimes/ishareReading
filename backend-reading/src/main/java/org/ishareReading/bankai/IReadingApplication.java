@@ -51,10 +51,10 @@ public class IReadingApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        InputStream inputStream = springAiResource.getInputStream();
-        Object metadata = bookUtils.getMetadata(inputStream.readAllBytes());
-        System.out.println(metadata);
-          hotRank.bookHotRank();
+//        InputStream inputStream = springAiResource.getInputStream();
+//        Object metadata = bookUtils.getMetadata(inputStream.readAllBytes());
+//        System.out.println(metadata);
+//          hotRank.bookHotRank();
     }
 
     @Bean

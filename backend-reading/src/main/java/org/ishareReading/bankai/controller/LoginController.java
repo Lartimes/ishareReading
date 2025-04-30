@@ -2,6 +2,7 @@ package org.ishareReading.bankai.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.ishareReading.bankai.exception.BaseException;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.LoginService;
@@ -62,22 +63,14 @@ public class LoginController {
         return Response.success("发送成功,请耐心等待");
     }
 
-    /**
-     * @param email
-     * @param captchaCode
-     *
-     * @return
-     */
-    @PostMapping("/check")
-    public Response check(@RequestParam("email") String email,
-                          @RequestParam("code") String captchaCode) {
-        if (email == null || captchaCode == null) {
+
+    public void check( String email,String emailCode) {
+        if (email == null || emailCode == null) {
             throw new IllegalArgumentException("参数不正确");
         }
-        if (!loginService.checkEmailCode(email, captchaCode)) {
-            return Response.fail("邮箱验证码错误");
+        if (!loginService.checkEmailCode(email, emailCode)) {
+            throw new BaseException("邮箱验证码错误");
         }
-        return Response.success();
     }
 
 
@@ -99,8 +92,16 @@ public class LoginController {
      * @return
      */
     @PostMapping("/register")
-    public Response register(@RequestBody Users users) {
-        if (!loginService.register(users)) {
+    public Response register(@RequestBody Map<String, Object> map) {
+        String emailCode = (String) map.get("emailCode");
+        Users user = new Users();
+
+        Map<String, Object> userMap = (Map<String, Object>) map.get("user");
+        user.setUserName((String) userMap.get("userName"));
+        user.setEmail((String) userMap.get("email"));
+        user.setPassword((String) userMap.get("password"));
+        check(user.getEmail(),emailCode);
+        if (!loginService.register(user)) {
             return Response.fail("注册失败,验证码错误");
         }
         return Response.success("注册成功");
