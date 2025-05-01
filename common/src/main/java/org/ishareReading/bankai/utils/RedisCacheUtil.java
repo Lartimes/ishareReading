@@ -149,18 +149,14 @@ public class RedisCacheUtil {
     /**
      * 添加ZSET
      *
-     * @param key
-     * @param userId
-     * @param score
-     * @return
      */
-    public Boolean addZSetWithScores(String key, Object userId, Double score) {
+    public Boolean addZSetWithScores(String key, Object targeId, Double score) {
 
         try {
             if (score == null) {
                 score = (double) System.currentTimeMillis();
             }
-            return redisTemplate.opsForZSet().add(key, userId, score);
+            return redisTemplate.opsForZSet().add(key, targeId, score);
         } catch (Exception e) {
             return false;
         }

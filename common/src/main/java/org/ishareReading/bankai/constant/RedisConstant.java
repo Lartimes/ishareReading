@@ -41,4 +41,6 @@ public interface RedisConstant {
 
     String HOT_BOOK = "hot:book";
     String AUTHOR_FANS_COUNT = "author:fans:count";
+
+    String BOOK_TYPE = "book:type:";
 }

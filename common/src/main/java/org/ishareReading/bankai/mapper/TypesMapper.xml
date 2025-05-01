@@ -7,6 +7,7 @@
         <id column="id" property="id" />
         <result column="type_name" property="typeName" />
         <result column="type" property="type" />
+        <result column="embedding" property="embedding" />
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />
         <result column="delete_at" property="deleteAt" />

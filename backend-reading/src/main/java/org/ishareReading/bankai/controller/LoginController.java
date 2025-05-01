@@ -7,6 +7,7 @@ import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.LoginService;
 import org.ishareReading.bankai.service.UsersService;
 import org.ishareReading.bankai.utils.JWTUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +23,14 @@ public class LoginController {
     private final UsersService userService;
 
     private final JWTUtils jwtUtils;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public LoginController(LoginService loginService, UsersService userService, JWTUtils jwtUtils) {
+    public LoginController(LoginService loginService, UsersService userService, JWTUtils jwtUtils, ApplicationEventPublisher eventPublisher) {
         this.loginService = loginService;
         this.userService = userService;
         this.jwtUtils = jwtUtils;
+        this.eventPublisher = eventPublisher;
     }
-
 
     /**
      * 登录 邮箱 + 密码 如果有时间可以做一下毫秒级验证用户是否存在 大概是分布式单体布隆过滤器 + redis set/hashmap 来搞
@@ -47,8 +49,10 @@ public class LoginController {
         map.put("token", token);
         map.put("name", login.getAccount());
         map.put("user", login);
+        eventPublisher.publishEvent(login);
         return Response.success(map);
     }
+
 
     @PostMapping("/getCode")
     public Response getCode(@RequestBody Map<String, String> map) {
@@ -62,19 +66,6 @@ public class LoginController {
         return Response.success("发送成功,请耐心等待");
     }
 
-
-    public Response check(@RequestParam("email") String email,
-                          @RequestParam("code") String captchaCode) {
-        if (email == null || captchaCode == null) {
-            throw new IllegalArgumentException("参数不正确");
-        }
-        if (!loginService.checkEmailCode(email, captchaCode)) {
-            return Response.fail("邮箱验证码错误");
-        }
-        return Response.success();
-    }
-
-
     /**
      * @param response
      * @param uuId
@@ -85,7 +76,6 @@ public class LoginController {
     public void captcha(HttpServletResponse response, @PathVariable String uuId) throws Exception {
         loginService.captcha(response, uuId);
     }
-
 
     /**
      * 注册
@@ -101,11 +91,22 @@ public class LoginController {
         user.setUserName((String) userMap.get("userName"));
         user.setEmail((String) userMap.get("email"));
         user.setPassword((String) userMap.get("password"));
-        check(user.getEmail(),emailCode);
+        check(user.getEmail(), emailCode);
         if (!loginService.register(user)) {
             return Response.fail("注册失败,验证码错误");
         }
         return Response.success("注册成功");
+    }
+
+    public Response check(@RequestParam("email") String email,
+                          @RequestParam("code") String captchaCode) {
+        if (email == null || captchaCode == null) {
+            throw new IllegalArgumentException("参数不正确");
+        }
+        if (!loginService.checkEmailCode(email, captchaCode)) {
+            return Response.fail("邮箱验证码错误");
+        }
+        return Response.success();
     }
 
     /**

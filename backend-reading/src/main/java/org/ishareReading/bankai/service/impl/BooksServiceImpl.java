@@ -36,6 +36,7 @@ import org.ishareReading.bankai.service.FilesService;
 import org.ishareReading.bankai.utils.BookUtils;
 import org.ishareReading.bankai.utils.FileUtil;
 import org.ishareReading.bankai.utils.IdUtil;
+import org.ishareReading.bankai.utils.RedisCacheUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Async;
@@ -45,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -73,8 +75,9 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     private final SqlSession sqlSession;
     private final BookUnderlineCoordinatesService bookUnderlineCoordinatesService;
     private final BookOpinionsService bookOpinionsService;
+    private final RedisCacheUtil redisCacheUtil;
 
-    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService) {
+    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService, RedisCacheUtil redisCacheUtil) {
         this.ossService = ossService;
         this.redisTemplate = redisTemplate;
         this.filesService = filesService;
@@ -97,12 +100,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             String text = stripper.getText(pdDocument);
             System.out.println(text);
         }
-    }
-
-
-    @Override
-    public List<Books> getRecentlyReleaseBook() {
-        return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
     }
 
     @Override
@@ -139,6 +136,20 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             //TODO 异步进行数据内容处理？？、
             if (b) {
                 this.insertContestPages(books.getFileId(), books.getTotalPages());
+                //更新系统书籍类型库
+                if (books.getGenre() != null) {
+                    String[] genreSplit = books.getGenreSplit();
+                    byte[] value = String.valueOf(books.getId()).getBytes(StandardCharsets.UTF_8);
+                    redisCacheUtil.pipeline((connection -> {
+                        for (String label : genreSplit) {
+                            connection.zSetCommands().zAdd((RedisConstant.BOOK_TYPE + label).getBytes(),
+                                    System.currentTimeMillis(), value);
+                        }
+                        return null;
+                    }));
+                    redisCacheUtil.addZSetWithScores(RedisConstant.BOOK_TYPE, books.getUserId(), null);
+                }
+
             }
         }).start();
         return Response.success("添加成功");
@@ -262,8 +273,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         }
     }
 
-
-
     /**
      * 根据书籍ID 获取书籍门户首页信息 * 这里先SQL ， 后期接入ES *  bookinfo *  封面 *  当个书籍的热门评论
      *
@@ -356,54 +365,9 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         bookOpinionsService.save(bookOpinions);
     }
 
-
-
-    @SneakyThrows
-    private byte[] getStreamByPage(PDPage pdPage) {
-        PDResources resources = pdPage.getResources();
-        for (COSName xObjectName : resources.getXObjectNames()) {
-            PDXObject pdxObject = resources.getXObject(xObjectName);
-            if (pdxObject instanceof PDImageXObject image) {
-                System.out.println("Found image with width "
-                        + image.getWidth()
-                        + "px and height "
-                        + image.getHeight()
-                        + "px.");
-                BufferedImage bufferedImage = image.getImage();
-                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                    ImageIO.write(bufferedImage, "png", baos);
-                    baos.flush();
-                    return baos.toByteArray();
-                }
-            }
-        }
-        return null;
-    }
-
-    private String removeUselessCharactersByHanLP(String text) {
-        List<Term> termList = NLPTokenizer.segment(text);
-        StringBuilder result = new StringBuilder();
-        for (Term term : termList) {
-            if (!isUselessTerm(term)) {
-                result.append(term.word).append(" ");
-            }
-        }
-        return result.toString().trim();
-    }
-
-    private String generateSummary(String text) {
-        // 使用 HanLP 生成摘要
-        List<String> phraseList = HanLP.extractPhrase(text, 10);
-        StringBuilder summary = new StringBuilder();
-        for (String sentence : phraseList) {
-            summary.append(sentence).append(" ");
-        }
-        return summary.toString().trim();
-    }
-
-    private boolean isUselessTerm(Term term) {
-        // 这里可以根据词性等信息判断是否为无用词汇
-        return term.nature.startsWith("w"); // 移除标点符号
+    @Override
+    public List<Books> getRecentlyReleaseBook() {
+        return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
     }
 
     /**
@@ -445,6 +409,54 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             new Thread(() -> {
                 cn.hutool.core.io.FileUtil.del(new File(uuid + "jpg"));
             }).start();
+        }
+        return null;
+    }
+
+    private String removeUselessCharactersByHanLP(String text) {
+        List<Term> termList = NLPTokenizer.segment(text);
+        StringBuilder result = new StringBuilder();
+        for (Term term : termList) {
+            if (!isUselessTerm(term)) {
+                result.append(term.word).append(" ");
+            }
+        }
+        return result.toString().trim();
+    }
+
+    private String generateSummary(String text) {
+        // 使用 HanLP 生成摘要
+        List<String> phraseList = HanLP.extractPhrase(text, 10);
+        StringBuilder summary = new StringBuilder();
+        for (String sentence : phraseList) {
+            summary.append(sentence).append(" ");
+        }
+        return summary.toString().trim();
+    }
+
+    private boolean isUselessTerm(Term term) {
+        // 这里可以根据词性等信息判断是否为无用词汇
+        return term.nature.startsWith("w"); // 移除标点符号
+    }
+
+    @SneakyThrows
+    private byte[] getStreamByPage(PDPage pdPage) {
+        PDResources resources = pdPage.getResources();
+        for (COSName xObjectName : resources.getXObjectNames()) {
+            PDXObject pdxObject = resources.getXObject(xObjectName);
+            if (pdxObject instanceof PDImageXObject image) {
+                System.out.println("Found image with width "
+                        + image.getWidth()
+                        + "px and height "
+                        + image.getHeight()
+                        + "px.");
+                BufferedImage bufferedImage = image.getImage();
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                    ImageIO.write(bufferedImage, "png", baos);
+                    baos.flush();
+                    return baos.toByteArray();
+                }
+            }
         }
         return null;
     }

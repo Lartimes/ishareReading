@@ -35,4 +35,19 @@ public class Types extends BaseModel implements Serializable {
     @TableField("type")
     private String type;
 
+
+    @TableField("embedding")
+    private Double[] embedding;
+
+    public void setEmbedding(float[] embedding) {
+        Double[] doubleEmbedding = new Double[embedding.length];
+        for (int i = 0; i < embedding.length; i++) {
+            doubleEmbedding[i] = (double) embedding[i];
+        }
+        this.embedding = doubleEmbedding;
+    }
+
+    public void setEmbedding(Double[] embedding) {
+        this.embedding = embedding;
+    }
 }

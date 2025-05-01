@@ -63,16 +63,12 @@ server:
 aliyun:
   oss:
     buckets:
-      bucket1:
-        endpoint: https://oss-cn-hangzhou.aliyuncs.com
-        accessKeyId: your-access-key-id
-        accessKeySecret: your-access-key-secret
-        bucketName: your-bucket1-name
-      bucket2:
-        endpoint: https://oss-cn-shanghai.aliyuncs.com
-        accessKeyId: your-access-key-id
-        accessKeySecret: your-access-key-secret
-        bucketName: your-bucket2-name
+      bankai:
+        endpoint: oss-cn-hangzhou.aliyuncs.com
+        accessKeyId: LTAI5tRubA1tFPH7RMeSUAPt
+        accessKeySecret: ClNjKHKk2BYncyzLg4aJFck1YZyAdy
+        bucketName: bankai
+
 jwt:
   config:
     secret: "xyx8BDbRigUDaY6pZFfWus2jZWLPHO"

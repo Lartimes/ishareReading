@@ -63,7 +63,9 @@ public class Books extends BaseModel implements Serializable {
      */
     @TableField("genre")
     private String genre;
-
+    public   String[] getGenreSplit(){
+        return genre.split(",");
+    }
     /**
      * 简介
      */

@@ -166,7 +166,7 @@ public class UserModel {
      *
      * @param <T>
      */
-    public static class TypeScore<T> {
+    public static class TypeScore<T> implements Comparable<TypeScore<T>> {
         private static final int LUCKY_NUMBER = 307314;
         public T t; //实体类
         public Double score; //分数 0-1 ，这个分数和 点赞 + 阅读时间 + 发表见解/帖子 + 收藏 有关
@@ -240,6 +240,12 @@ public class UserModel {
                 }
             }
             return true;
+        }
+
+        @Override
+        public int compareTo(TypeScore<T> tTypeScore) {
+             return Double.compare(tTypeScore.score * 0.7 + tTypeScore.time * 0.3 ,
+                     this.score * 0.7 + this.score * 0.3);
         }
     }
 
