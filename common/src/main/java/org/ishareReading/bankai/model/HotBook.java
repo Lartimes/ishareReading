@@ -29,16 +29,16 @@ public class HotBook implements Serializable {
     String author;
     String genre;
     Long coverImageId;
-    Integer viewCount;
+    BigDecimal averageRating;
 
-    public HotBook(Double hot,Long id,String name,String author,String genre,Long coverImageId,Integer viewCount){
+    public HotBook(Double hot,Long id,String name,String author,String genre,Long coverImageId,BigDecimal averageRating){
         this.hot = hot;
         this.id = id;
         this.name = name;
         this.author = author;
         this.genre =genre;
         this.coverImageId = coverImageId;
-        this.viewCount = viewCount;
+        this.averageRating = averageRating;
 
     }
 

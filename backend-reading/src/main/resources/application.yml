@@ -13,6 +13,8 @@ server:
     async-timeout: 300000 # 异步请求超时时间 5分钟
 
 spring:
+  profiles:
+    active: devxyx
   servlet:
     multipart:
       enabled: true

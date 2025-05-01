@@ -6,9 +6,12 @@ import com.hankcs.hanlp.mining.word2vec.Vector;
 import com.hankcs.hanlp.mining.word2vec.Word2VecTrainer;
 import com.hankcs.hanlp.mining.word2vec.WordVectorModel;
 import org.ishareReading.bankai.model.Types;
+import org.ishareReading.bankai.model.Users;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,11 +21,9 @@ public class WordVectorUtil {
     private static final int TOP_N_SIZE = 5;
     private static final Float WEAK_SIMILARITY = 0.26f;
     private static final String TRAIN_FILE_NAME =
-            "D:\\Dev\\DataType\\Data-Type-JAVA\\data-type-algorithm\\src\\main\\resources\\" +
-                    "data\\train\\wordVec.txt"; //测试环境
+            "C:\\Users\\肖宇轩\\OneDrive\\Desktop\\hanlp-wiki-vec-zh.txt"; //测试环境
     private static final String MODEL_FILE_NAME =
-            "D:\\Dev\\DataType\\Data-Type-JAVA\\data-type-algorithm\\src\\main\\resources\\" +
-                    "data\\train\\hanlp-wiki-vec-zh.txt"; //生产环境
+            "C:\\Users\\肖宇轩\\OneDrive\\Desktop\\hanlp-wiki-vec-zh.txt"; //生产环境
     private static final WordVectorUtil INSTANCE = new WordVectorUtil();
     private static final Word2VecTrainer trainerBuilder = new Word2VecTrainer();
 
