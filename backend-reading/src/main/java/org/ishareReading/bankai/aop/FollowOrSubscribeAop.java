@@ -22,7 +22,7 @@ public class FollowOrSubscribeAop {
     @Autowired
     private ApplicationContext applicationContext;
 
-    public void likeOrUnlikeObject(Map<String, String> map) {
+    public void followOrUnfollow(Map<String, String> map) {
         String type = map.get("type");
         String id = map.get("id");
         Map<String, FollowInterface> beansOfType = applicationContext.getBeansOfType(FollowInterface.class);

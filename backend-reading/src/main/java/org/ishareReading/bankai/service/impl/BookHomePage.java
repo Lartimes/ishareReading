@@ -55,6 +55,7 @@ public class BookHomePage implements CommentInterface {
         long userId = Long.parseLong(map.get("userId"));
         BookOpinions bookOpinions = new BookOpinions();
         bookOpinions.setUserId(userId);
+        bookOpinions.setBookId(Long.parseLong(map.get("id")));
         bookOpinions.setOpinionText(map.get("text"));
         boolean save = bookOpinionsService.save(bookOpinions);
         Long id = bookOpinions.getId();

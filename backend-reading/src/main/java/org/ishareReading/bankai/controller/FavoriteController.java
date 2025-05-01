@@ -21,6 +21,8 @@ public class FavoriteController {
 
     /**
      * 收藏或者取消收藏
+     * books
+     * posts
      */
     @GetMapping("/{type}/{id}")
     public Response doOrUndoFavorite(@PathVariable String type, @PathVariable Long id) {

@@ -13,6 +13,10 @@
     <version>1.0.0</version>
 
     <dependencies>
+          <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
         <!--        验证码-->
         <dependency>
             <groupId>pro.fessional</groupId>

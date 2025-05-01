@@ -47,6 +47,9 @@ public class LoginListener {
             return;
         }
         UserModel userModel = objectMapper.readValue(userModelStr, UserModel.class);
+        if(userModel == null){
+            return;
+        }
         userModel.setReadingFrequency(userModel.getReadingFrequency() + 1 > 7 ? 7 : userModel.getReadingFrequency());
         Set<UserModel.TypeScore<Posts>> set1 = userModel.getPostTypes();
         int size = set1.size();

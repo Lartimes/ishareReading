@@ -47,10 +47,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -200,7 +197,8 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         new ByteArrayInputStream(bytes);
 //        cover img id
 //        book id
-
+//      这里其实需要es pipeline处理缓存封面等页数的
+//        OSS拿吧，要么就book_content_page
         Object metadata = bookUtils.getMetadata(bytes);
         record TMP(BookUtils.MetaData metaData, String imgId, String bookId) {
         }
@@ -265,7 +263,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                 bookContentPage.setBookId(fileId);
                 bookContentPage.setPage(page);
                 bookContentPage.setContent(pageContent);
-                PDPage pdPage = pdDocument.getPage(page -1);
+                PDPage pdPage = pdDocument.getPage(page - 1);
                 bookContentPage.setPdfPageStream(getStreamByPage(pdPage));
                 list.add(bookContentPage);
                 if (list.size() % 50 == 0) {
@@ -290,6 +288,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @Override
     public BooksInfoHomePage getBooksInfoById(Long id) {
         Books book = this.getById(id);
+        book.setViewCount(book.getViewCount() + 1);
         Long fileId = book.getFileId();
         Long coverImageId = book.getCoverImageId(); //封面id？
         Files coverage = filesService.getById(coverImageId);
@@ -311,7 +310,9 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                 .isNull(BookOpinions::getUnderlinedId)
                 .orderByDesc(BookOpinions::getLikeCount, BookOpinions::getCreateAt)
                 .last("limit 5")); //默认五条，我们整个系统不做分页了
-
+        new Thread(() -> {
+            this.updateById(book);
+        }).start();
         return new BooksService.BooksInfoHomePage(book, coverageBase64, list, 0);
     }
 
@@ -371,6 +372,29 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         bookOpinionsService.save(bookOpinions);
     }
 
+    @SneakyThrows
+    @Override
+    public List<BooksInfoHomePage> convert2HomePage(Collection<Books> books) {
+        int size = books.size();
+        ArrayList<BooksInfoHomePage> result = new ArrayList<>(size);
+        for (Books book : books) {
+            byte[] coverageByes = null;
+            Long coverImageId = book.getCoverImageId();
+            Files coverage = filesService.getById(coverImageId);
+            if (!ossService.doesObjectExist(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath())) {
+                BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
+                        .eq(BookContentPage::getBookId, book.getId())
+                        .eq(BookContentPage::getPage, 0));
+                coverageByes = bookContentPage.getPdfPageStream();
+            } else {
+                coverageByes = osService.download(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath()).readAllBytes();
+            }
+            String coverageBase64 = Base64.encodeBase64String(coverageByes);
+            result.add(new BooksService.BooksInfoHomePage(book, coverageBase64, null, null));
+        }
+        return result;
+    }
+
     @Override
     public List<Books> getRecentlyReleaseBook() {
         return list(new LambdaQueryWrapper<Books>().orderByDesc(Books::getUploadTime).last("limit 5"));
@@ -405,7 +429,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                     ImageIO.write(image.getImage(), "jpg", new File(uuid + ".jpg"));
                     File coverageFileImg = new File(uuid + ".jpg"); //首页作为封面
                     System.out.println(coverageFileImg.getAbsolutePath());
-                    System.out.println(osService.toString());
                     try (FileInputStream fileInputStream = new FileInputStream(coverageFileImg)) {
                         return ossService.upload(BucketConstant.COMMON_BUCKET_NAME, fileInputStream, uuid + ".jpg");
                     }
@@ -441,11 +464,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         return summary.toString().trim();
     }
 
-    private boolean isUselessTerm(Term term) {
-        // 这里可以根据词性等信息判断是否为无用词汇
-        return term.nature.startsWith("w"); // 移除标点符号
-    }
-
     @SneakyThrows
     private byte[] getStreamByPage(PDPage pdPage) {
         PDResources resources = pdPage.getResources();
@@ -466,5 +484,10 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             }
         }
         return null;
+    }
+
+    private boolean isUselessTerm(Term term) {
+        // 这里可以根据词性等信息判断是否为无用词汇
+        return term.nature.startsWith("w"); // 移除标点符号
     }
 }

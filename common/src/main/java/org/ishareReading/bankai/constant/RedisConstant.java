@@ -2,7 +2,7 @@ package org.ishareReading.bankai.constant;
 
 public interface RedisConstant {
 
-//    用户模型的key
+    //    用户模型的key
     String USER_MODEL = "user:model:";
 
     String CAPTCHA = "captcha:";
@@ -32,8 +32,8 @@ public interface RedisConstant {
 
     // 作者的粉丝
     String AUTHOR_FANS = "author:fans";
-
-
+    String BOOKS_HISTORY = "books:history:";
+    String POSTS_HISTORY = "posts:history:";
     String LIKE_PREFIX = "like";
     String LIKE_COUNT = "like:count";
 
@@ -43,4 +43,5 @@ public interface RedisConstant {
     String AUTHOR_FANS_COUNT = "author:fans:count";
 
     String BOOK_TYPE = "book:type:";
+    String AUTHOR = "author:";
 }

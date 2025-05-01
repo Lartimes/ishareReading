@@ -21,10 +21,7 @@
             <artifactId>common</artifactId>
             <version>${parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.ishare</groupId>
             <artifactId>oss-starter</artifactId>
@@ -33,16 +30,24 @@
             <groupId>com.hankcs</groupId>
             <artifactId>hanlp</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/co.elastic.clients/elasticsearch-java -->
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version> <!-- 版本号可按需调整 -->
+            <version>8.0.33</version>
         </dependency>
         <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>1.9.6</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
     </dependencies>
 

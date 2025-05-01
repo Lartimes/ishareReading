@@ -1,9 +1,12 @@
 package org.ishareReading.bankai.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.ishareReading.bankai.constant.RedisConstant;
+import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.model.Posts;
 import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.PostsService;
+import org.ishareReading.bankai.utils.RedisCacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +22,8 @@ public class PostController {
 
     @Autowired
     private PostsService postsService;
+    @Autowired
+    private RedisCacheUtil redisCacheUtil;
 
     /**
      * 上传帖子 这个帖子也可能关联 book ， 需要前端是否挂起超链接？？？
@@ -44,6 +49,10 @@ public class PostController {
      */
     @GetMapping("/viewPost")
     public Response viewPost(@RequestParam Long id) {
+        Long userId = UserHolder.get();
+        new Thread(() -> {
+            redisCacheUtil.addZSetWithScores(RedisConstant.POSTS_HISTORY + userId, id, null);
+        }).start();
         return Response.success(postsService.getPostInfo(id));
     }
 
@@ -67,7 +76,7 @@ public class PostController {
                                 Posts::getCreateAt)
         );
         int size = list.size();
-        list = size > 5 ? list.subList((page - 1) * 5, size) : list;
+        list = size > 6 ? list.subList((page - 1) * 6, size) : list;
         return Response.success(list);
     }
 

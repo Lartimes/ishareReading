@@ -1,13 +1,14 @@
 package org.ishareReading.bankai.service;
 
-import org.ishareReading.bankai.model.Books;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.ishareReading.bankai.model.BookOpinions;
 import org.ishareReading.bankai.model.BookUnderlineCoordinates;
+import org.ishareReading.bankai.model.Books;
 import org.ishareReading.bankai.model.HotBook;
 import org.ishareReading.bankai.response.Response;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -45,19 +46,21 @@ public interface BooksService extends IService<Books> {
      */
     void markBook(BookUnderlineCoordinates bookUnderlineCoordinates);
 
+    List<BooksInfoHomePage> convert2HomePage(Collection<Books> singleton);
+
 
     /**
      * 首页门户书籍信息
      */
     record BooksInfoHomePage(Books books, String coverageBase64, List<org.ishareReading.bankai.model.BookOpinions> list,
-                             int pageNum) {
+                             Integer pageNum) {
 
     }
 
     /**
      * 阅读模式书籍信息
      */
-    record BooksInfoReadingMode(Books books, String imgBase64, int pageNum, List<BookOpinions> infoList) {
+    record BooksInfoReadingMode(Books books, String imgBase64, Integer pageNum, List<BookOpinions> infoList) {
     }
 
     List<Books> getRecentlyReleaseBook();

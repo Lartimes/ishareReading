@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>../backend-reading</module>
-<!--        <module>../oss-starter</module>-->
+        <!--        <module>../oss-starter</module>-->
         <module>../common</module>
         <module>../agent-reading</module>
         <module>../agent-client</module>
@@ -40,11 +40,18 @@
         <captcha.version>2.3.3</captcha.version>
         <oss.version>1.0.0</oss.version>
         <pdf.version>3.0.3</pdf.version>
+        <es.java.version>8.6.2</es.java.version>
     </properties>
 
     <dependencyManagement>
         <!-- https://mvnrepository.com/artifact/com.alibaba.cloud/aliyun-oss-spring-boot-starter -->
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/co.elastic.clients/elasticsearch-java -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>${es.java.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.pdfbox</groupId>
                 <artifactId>pdfbox</artifactId>

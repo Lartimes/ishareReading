@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author wüsch
@@ -162,24 +161,6 @@ public class RedisCacheUtil {
         }
     }
 
-    /**
-     * 示例：添加成员到 ZSet，所有成员分数相同
-     *
-     * @param key     ZSet 的键
-     * @param members 要添加的成员集合
-     * @return 添加成功的成员数量
-     */
-    public Boolean addMembers(String key, Set<Object> members) {
-        ZSetOperations<String, Object> zSetOps = redisTemplate.opsForZSet();
-        Set<ZSetOperations.TypedTuple<Object>> tuples = members.stream()
-                .map(member -> new DefaultTypedTuple<Object>(member, (double) System.currentTimeMillis()))
-                .collect(Collectors.toSet());
-        Long add = zSetOps.add(key, tuples);
-        if (add != null) {
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
-    }
 
 
     /**
@@ -271,7 +252,7 @@ public class RedisCacheUtil {
      * @param arr
      * @return
      */
-    public Collection<Object> sRandom(ArrayList<String> arr) {
+    public Collection<Object> sRandom(List<String> arr) {
         return redisTemplate.executePipelined((RedisCallback<?>) connection -> {
             for (String s : arr) {
                 connection.zSetCommands().zRandMember(s.getBytes());

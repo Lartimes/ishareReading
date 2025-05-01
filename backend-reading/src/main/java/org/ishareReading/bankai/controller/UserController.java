@@ -147,7 +147,7 @@ public class UserController {
     @GetMapping("/followObejct")
     public Response followObejct(@RequestBody Map<String, String> map) {
         boolean equals = "true".equals(map.get("do"));
-        followOrSubscribeAop.likeOrUnlikeObject(map);
+        followOrSubscribeAop.followOrUnfollow(map);
         if (equals) {
             return Response.success("关注成功");
         } else {

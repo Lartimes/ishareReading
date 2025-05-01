@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.ishareReading.bankai.config.VectorTypeHandler;
 
 import java.io.Serializable;
 
@@ -18,6 +20,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @TableName("types")
+@ToString
 public class Types extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -36,18 +39,8 @@ public class Types extends BaseModel implements Serializable {
     private String type;
 
 
-    @TableField("embedding")
-    private Double[] embedding;
+    @TableField(value = "embedding",typeHandler = VectorTypeHandler.class)
+    private float[] embedding;
 
-    public void setEmbedding(float[] embedding) {
-        Double[] doubleEmbedding = new Double[embedding.length];
-        for (int i = 0; i < embedding.length; i++) {
-            doubleEmbedding[i] = (double) embedding[i];
-        }
-        this.embedding = doubleEmbedding;
-    }
 
-    public void setEmbedding(Double[] embedding) {
-        this.embedding = embedding;
-    }
 }

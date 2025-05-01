@@ -18,11 +18,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.io.Resource;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDateTime;
 
 
+@EnableElasticsearchRepositories(basePackages = "org.ishareReading.bankai.es")
 @EnableConfigurationProperties({OssProperties.class})
 @ComponentScan(basePackages = {"org.ishare.oss", "org.ishareReading.bankai"})
 @MapperScan(basePackages = {"org.ishareReading.bankai.mapper"})

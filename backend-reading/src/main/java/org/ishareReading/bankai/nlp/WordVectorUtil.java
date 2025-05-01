@@ -5,6 +5,7 @@ import com.hankcs.hanlp.mining.word2vec.DocVectorModel;
 import com.hankcs.hanlp.mining.word2vec.Vector;
 import com.hankcs.hanlp.mining.word2vec.Word2VecTrainer;
 import com.hankcs.hanlp.mining.word2vec.WordVectorModel;
+import org.ishareReading.bankai.es.BookVector;
 import org.ishareReading.bankai.model.Types;
 
 import java.io.IOException;
@@ -17,12 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WordVectorUtil {
     private static final int TOP_N_SIZE = 5;
     private static final Float WEAK_SIMILARITY = 0.26f;
-    private static final String TRAIN_FILE_NAME =
-            "D:\\Dev\\DataType\\Data-Type-JAVA\\data-type-algorithm\\src\\main\\resources\\" +
-                    "data\\train\\wordVec.txt"; //测试环境
-    private static final String MODEL_FILE_NAME =
-            "D:\\Dev\\DataType\\Data-Type-JAVA\\data-type-algorithm\\src\\main\\resources\\" +
-                    "data\\train\\hanlp-wiki-vec-zh.txt"; //生产环境
+    private static final String TRAIN_FILE_NAME = "./data/train/wordVec.txt"; //测试环境
+    private static final String MODEL_FILE_NAME = "./data/train/hanlp-wiki-vec-zh.txt"; //生产环境
     private static final WordVectorUtil INSTANCE = new WordVectorUtil();
     private static final Word2VecTrainer trainerBuilder = new Word2VecTrainer();
 
@@ -91,6 +88,17 @@ public class WordVectorUtil {
             types.setType(type);
             types.setTypeName(keyword);
             result.add(types);
+        });
+        return result;
+    }
+     public Collection<BookVector> generateVector(List<String> keywords) {
+        ArrayList<BookVector> result = new ArrayList<>(keywords.size());
+        keywords.parallelStream().forEach(keyword -> {
+            Vector vector = wordVectorModel.vector(keyword);
+            BookVector bookVector = new BookVector();
+            bookVector.setEmbedding(vector.getElementArray());
+            bookVector.setName(keyword);
+            result.add(bookVector);
         });
         return result;
     }

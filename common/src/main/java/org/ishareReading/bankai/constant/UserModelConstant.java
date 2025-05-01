@@ -16,16 +16,18 @@ package org.ishareReading.bankai.constant;
 public interface UserModelConstant {
     class READING {
         public static final double PING = 3;
+        public static final double VIEW = 0.5;
         public static final double LIKE = 1;
         public static final double OPINION = 4;
-        public static final double MARK = 1;
+        public static final double MARK = 2;
+        public static final double READ = 2;
         public static final double STAR = 5;
     }
 
     class POST {
         public static final double STAR = 5;
         public static final double LIKE = 1;
-        public static final double COMMENT = 3;
+        public static final double COMMENT = 1;
         public static final double VIEW = 0.5;
     }
 

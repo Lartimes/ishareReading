@@ -35,6 +35,8 @@ public class UserModel {
         books1.setId(1L);
         books1.setGenre("恐怖,文学");
         typeScores.add(new TypeScore<Books>(books1, 10.0, 30));
+        Books books = new Books();
+        books.setId(1L);
         Books books2 = new Books();
         books2.setId(2L);
         books2.setGenre("小说");
@@ -68,8 +70,11 @@ public class UserModel {
     /**
      * 对UserModel，books 生成胜率数组
      */
-    private String[] initBooksProbabilityArray() {
+    public String[] initBooksProbabilityArray() {
         Set<String> set = new HashSet<>();
+        if (bookTypes.isEmpty()) {
+            return null;
+        }
         for (TypeScore<Books> bookType : bookTypes) {
             set.addAll(bookType.getBooksTypes());
         }
@@ -126,14 +131,18 @@ public class UserModel {
             }
             index.addAndGet(v.intValue());
         });
+        Collections.shuffle(arr); //打乱
         return arr.toArray(new String[0]);
     }
 
     /**
      * 初始化
      */
-    private Long[] initPostsProbabilityArray() {
+    public Long[] initPostsProbabilityArray() {
         ConcurrentHashMap<Long, Integer> map = new ConcurrentHashMap<>();
+        if (postTypes.isEmpty()) {
+            return null;
+        }
         for (TypeScore<Posts> postType : postTypes) {
             map.put(postType.t.getTypeId(), 0);
         }
@@ -143,23 +152,26 @@ public class UserModel {
             Posts t = postsTypeScore.t;
             Double score = postsTypeScore.score;
             Long typeId = t.getTypeId();
-            int tmp =  ((int) Math.ceil(score) + size) / size; //避免一些type一直为0
+            int tmp = ((int) Math.ceil(score) + size) / size; //避免一些type一直为0
             count.addAndGet(tmp);
-            map.put(typeId, map.getOrDefault(typeId, 0) +tmp);
+            map.put(typeId, map.getOrDefault(typeId, 0) + tmp);
         });
-        final Long[] probabilityArray = new Long[count.get()];
+        List<Long> probabilityArray = new ArrayList<Long>(count.get());
 
         final AtomicInteger index = new AtomicInteger(0);
         map.forEach((id, score) -> {
             int i = index.get();
             int limit = i + score;
             while (i++ < limit) {
-                probabilityArray[i] = id;
+                probabilityArray.set(i , id);
             }
             index.set(limit);
         });
-        return probabilityArray;
+
+        Collections.shuffle(probabilityArray); //打乱
+        return probabilityArray.toArray(new Long[0]);
     }
+
 
     /**
      * map<t.id , .. 根据name向量化>
@@ -173,16 +185,6 @@ public class UserModel {
         public Integer time; //阅读时间
         public LocalDate readDate; //仅用于阅读
 
-        @Override
-        public String toString() {
-            return "TypeScore{" +
-                    "t=" + t +
-                    ", score=" + score +
-                    ", time=" + time +
-                    ", readDate=" + readDate +
-                    '}';
-        }
-
         public TypeScore() {
         }
 
@@ -191,7 +193,6 @@ public class UserModel {
             this.score = score;
             this.time = time;
         }
-
 
         /**
          * 获取书籍类型
@@ -243,9 +244,19 @@ public class UserModel {
         }
 
         @Override
+        public String toString() {
+            return "TypeScore{" +
+                    "t=" + t +
+                    ", score=" + score +
+                    ", time=" + time +
+                    ", readDate=" + readDate +
+                    '}';
+        }
+
+        @Override
         public int compareTo(TypeScore<T> tTypeScore) {
-             return Double.compare(tTypeScore.score * 0.7 + tTypeScore.time * 0.3 ,
-                     this.score * 0.7 + this.score * 0.3);
+            return Double.compare(tTypeScore.score * 0.7 + tTypeScore.time * 0.3,
+                    this.score * 0.7 + this.score * 0.3);
         }
     }
 

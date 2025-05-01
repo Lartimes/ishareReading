@@ -62,6 +62,7 @@ public class TypeController {
                                 @RequestParam String keywords) {
         List<String> keyWords = Arrays.stream(keywords.split(",")).collect(Collectors.toList());
         List<Types> types = INSTANCE.generateVector(keyWords, type);
+        System.out.println("==============");
         return Response.success(typesService.saveBatch(types));
     }
 

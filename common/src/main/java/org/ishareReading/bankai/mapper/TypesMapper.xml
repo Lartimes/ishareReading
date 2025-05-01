@@ -4,13 +4,43 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="org.ishareReading.bankai.model.Types">
-        <id column="id" property="id" />
-        <result column="type_name" property="typeName" />
-        <result column="type" property="type" />
-        <result column="embedding" property="embedding" />
-        <result column="create_at" property="createAt" />
-        <result column="update_at" property="updateAt" />
-        <result column="delete_at" property="deleteAt" />
+        <id column="id" property="id"/>
+        <result column="type_name" property="typeName"/>
+        <result column="type" property="type"/>
+        <result column="embedding" property="embedding"/>
+        <result column="create_at" property="createAt"/>
+        <result column="update_at" property="updateAt"/>
+        <result column="delete_at" property="deleteAt"/>
     </resultMap>
+
+    <select id="findSimilarTypes" resultType="org.ishareReading.bankai.model.Types">
+        <![CDATA[
+            WITH input_embeddings AS (
+                SELECT
+                    embedding
+                FROM
+                    types
+                WHERE
+                    type = 'books'
+                    AND type_name IN
+        ]]>
+        <foreach item="typeName" collection="typeNames" open="(" separator="," close=")">
+            #{typeName}
+        </foreach>
+        <![CDATA[
+            )
+            SELECT DISTINCT
+                t.*,
+                t.embedding <-> ie.embedding AS similarity
+            FROM
+                types t
+            JOIN
+                input_embeddings ie ON t.type = 'books'
+            ORDER BY
+                similarity desc
+            limit #{size}
+        ]]>
+    </select>
+
 
 </mapper>
