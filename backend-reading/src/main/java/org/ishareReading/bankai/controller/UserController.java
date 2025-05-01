@@ -1,6 +1,7 @@
 package org.ishareReading.bankai.controller;
 
 import org.ishareReading.bankai.aop.CommentAop;
+import org.ishareReading.bankai.aop.FollowOrSubscribeAop;
 import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.response.Response;
@@ -23,6 +24,8 @@ public class UserController {
     private CommentAop commentAop;
     @Autowired
     private LikesService likesService;
+    @Autowired
+    private FollowOrSubscribeAop followOrSubscribeAop;
 //    这个关注的需要重构， aop + context + 切面 类似于SPI ，
 //    @GetMapping("/follow/{targetUserId}")
 //    public Response follow(@PathVariable("targetUserId") Long targetUserId) {
@@ -106,8 +109,6 @@ public class UserController {
     }
 
 
-
-
     /**
      * 进行点赞
      *
@@ -134,6 +135,24 @@ public class UserController {
     public Response unlikeObject(@PathVariable("objectId") Long objectId,
                                  @PathVariable("type") String type) {
         return likesService.unlikeObject(objectId, type, UserHolder.get());
+    }
+
+
+    /**
+     * 关注或者取关 书籍 帖子 作者 用户
+     *  TODO 消息信箱
+     *
+     * @return
+     */
+    @GetMapping("/followObejct")
+    public Response followObejct(@RequestBody Map<String, String> map) {
+        boolean equals = "true".equals(map.get("do"));
+        followOrSubscribeAop.likeOrUnlikeObject(map);
+        if (equals) {
+            return Response.success("关注成功");
+        } else {
+            return Response.success("取关成功");
+        }
     }
 
 
