@@ -52,7 +52,7 @@ public class HotRank {
         List<Books> books = booksService.list(new LambdaQueryWrapper<Books>()
                 .select(Books::getId, Books::getAuthor,Books::getGenre,
                         Books::getCoverImageId,Books::getAverageRating,Books::getRatingCount,Books::getViewCount,
-                        Books::getDownloadCount,Books::getUploadTime).gt(Books::getId, id)
+                        Books::getDownloadCount,Books::getUploadTime,Books::getName).gt(Books::getId, id)
                 .last("limit " + limit)
         );
         while (books != null && !books.isEmpty()){
@@ -65,9 +65,11 @@ public class HotRank {
 
                 // 热度公式
                 final double v = weightRandom();
-                if(book.getViewCount() == null){
+                if(book.getViewCount() == null || book.getDownloadCount() == null || book.getAverageRating() == null || book.getRatingCount() == null){
                     return;
                 }
+
+
                 double heatScore =
                         0.3 * book.getViewCount() +
                                 0.4 * book.getDownloadCount() +
@@ -75,18 +77,18 @@ public class HotRank {
                                 0.1 * Math.exp(-0.05 * daysSinceUpload) + v;
 
 
-               final HotBook hotVideo = new HotBook(heatScore, book.getId(), book.getName(),book.getAuthor(),
-                       book.getGenre(),book.getCoverImageId(),book.getViewCount());
+                final HotBook hotVideo = new HotBook(heatScore, book.getId(), book.getName(),book.getAuthor(),
+                        book.getGenre(),book.getCoverImageId(),book.getAverageRating());
 
                 synchronized (topK) {
                     topK.add(hotVideo);
                 }
             });
-            id = books.getLast().getId();
+            id = books.get(books.size() - 1).getId();
             books = booksService.list(new LambdaQueryWrapper<Books>()
                     .select(Books::getId, Books::getAuthor,Books::getGenre,
                             Books::getCoverImageId,Books::getAverageRating,Books::getRatingCount,Books::getViewCount,
-                            Books::getDownloadCount,Books::getUploadTime).gt(Books::getId, id)
+                            Books::getDownloadCount,Books::getUploadTime,Books::getName).gt(Books::getId, id)
                     .last("limit " + limit)
             );
         }
@@ -97,7 +99,6 @@ public class HotRank {
         if(ObjectUtils.isEmpty(hotBooks)){
             return;
         }
-        Double minHot = hotBooks.getFirst().getHot();
 
         redisTemplate.opsForZSet().removeRange(RedisConstant.HOT_BOOK, 0,-1);
 
