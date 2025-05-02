@@ -4,15 +4,16 @@ create table files
         constraint pk_files
             primary key,
     file_path varchar(255) not null,
-    file_name varchar(255) not null,
-    format    varchar(50)  not null,
-    type      varchar(50)  not null,
-    size      bigint       not null,
-    user_id   bigint       not null,
+    file_name varchar(255),
+    format    varchar(50),
+    type      varchar(50),
+    size      bigint,
+    user_id   bigint,
     is_public boolean default true,
     create_at timestamp,
     update_at timestamp,
-    delete_at timestamp
+    delete_at timestamp,
+    extension varchar
 );
 
 comment on table files is '文件表';
@@ -215,10 +216,10 @@ alter table comments
 
 create table books
 (
-    id               bigint       not null
+    id               bigint not null
         constraint pk_books
             primary key,
-    name             varchar(255) not null,
+    name             varchar(255),
     author           varchar(255),
     publication_year integer,
     publisher        varchar(255),
@@ -255,7 +256,7 @@ comment on column books.publisher is '出版社';
 
 comment on column books.isbn is '唯一标识号';
 
-comment on column books.genre is '书籍类型，关联type表';
+comment on column books.genre is '书籍类型，关联type表，逗号隔开';
 
 comment on column books.description is '简介';
 
@@ -342,12 +343,14 @@ create table book_opinions
     id            bigint not null
         constraint pk_book_opinions
             primary key,
-    underlined_id bigint not null,
+    underlined_id bigint,
     opinion_text  text   not null,
     like_count    integer default 0,
     create_at     timestamp,
     update_at     timestamp,
-    delete_at     timestamp
+    delete_at     timestamp,
+    user_id       bigint,
+    book_id       bigint
 );
 
 comment on table book_opinions is '书籍见解表';
@@ -378,7 +381,6 @@ create table notebooks
     user_id      bigint not null,
     note_name    varchar(255),
     note_content text,
-    file_id      bigint,
     create_at    timestamp,
     update_at    timestamp,
     delete_at    timestamp
@@ -395,8 +397,6 @@ comment on column notebooks.user_id is '用户id';
 comment on column notebooks.note_name is '笔记名字';
 
 comment on column notebooks.note_content is '笔记内容';
-
-comment on column notebooks.file_id is '文件表id';
 
 comment on column notebooks.create_at is '创建时间';
 
@@ -482,7 +482,8 @@ create table types
     type      varchar(50) not null,
     create_at timestamp,
     update_at timestamp,
-    delete_at timestamp
+    delete_at timestamp,
+    embedding vector
 );
 
 comment on table types is '类型表(帖子类型、书籍类型)';
@@ -516,10 +517,10 @@ create table agents
     tools              jsonb,
     knowledge_base_ids jsonb,
     agent_type         integer,
-    user_id            bigint,
     create_at          timestamp,
     update_at          timestamp,
-    delete_at          timestamp
+    delete_at          timestamp,
+    user_id            bigint
 );
 
 comment on table agents is 'agent表';
@@ -544,8 +545,6 @@ comment on column agents.knowledge_base_ids is '知识库ids,json格式，配置
 
 comment on column agents.agent_type is '智能体类型， 1.聊天性 2.功能型agent';
 
-comment on column agents.user_id is '创建人用户id';
-
 comment on column agents.create_at is '创建时间';
 
 comment on column agents.update_at is '更新时间';
@@ -553,38 +552,6 @@ comment on column agents.update_at is '更新时间';
 comment on column agents.delete_at is '逻辑删除时间';
 
 alter table agents
-    owner to postgres;
-
-create table contexts
-(
-    id                bigint not null
-        constraint pk_contexts
-            primary key,
-    session_id        bigint not null,
-    activate_messages jsonb,
-    summary           text,
-    create_at         timestamp,
-    update_at         timestamp,
-    delete_at         timestamp
-);
-
-comment on table contexts is '上下文表';
-
-comment on column contexts.id is '主键';
-
-comment on column contexts.session_id is '会话id';
-
-comment on column contexts.activate_messages is '活跃列表ids';
-
-comment on column contexts.summary is '过去N条消息的摘要';
-
-comment on column contexts.create_at is '创建时间';
-
-comment on column contexts.update_at is '更新时间';
-
-comment on column contexts.delete_at is '逻辑删除时间';
-
-alter table contexts
     owner to postgres;
 
 create table sessions
@@ -595,12 +562,13 @@ create table sessions
     title       varchar(255),
     user_id     bigint not null,
     agent_id    bigint,
-    is_archived boolean default false,
+    archived    boolean default false,
     description text,
     metadata    jsonb,
     create_at   timestamp,
     update_at   timestamp,
-    delete_at   timestamp
+    delete_at   timestamp,
+    summary     text
 );
 
 comment on table sessions is 'sessions表';
@@ -613,7 +581,7 @@ comment on column sessions.user_id is '所属用户ID';
 
 comment on column sessions.agent_id is '关联的agentId';
 
-comment on column sessions.is_archived is '是否归档';
+comment on column sessions.archived is '是否归档';
 
 comment on column sessions.description is '会话描述';
 
@@ -624,6 +592,8 @@ comment on column sessions.create_at is '创建时间';
 comment on column sessions.update_at is '更新时间';
 
 comment on column sessions.delete_at is '逻辑删除时间';
+
+comment on column sessions.summary is '之前N条活跃消息的summary';
 
 alter table sessions
     owner to postgres;
@@ -640,7 +610,8 @@ create table messages
     model       varchar(50),
     create_at   timestamp,
     update_at   timestamp,
-    delete_at   timestamp
+    delete_at   timestamp,
+    actived     boolean
 );
 
 comment on table messages is 'messages表';
@@ -663,139 +634,9 @@ comment on column messages.update_at is '更新时间';
 
 comment on column messages.delete_at is '逻辑删除时间';
 
+comment on column messages.actived is '该消息是否活跃？？ 活跃标准是什么？ (相隔时间？ token数量)';
+
 alter table messages
-    owner to postgres;
-
-create table message_group_items
-(
-    id            bigint not null
-        constraint pk_message_group_items
-            primary key,
-    group_tags_id bigint not null,
-    message_id    bigint not null,
-    sort_order    integer,
-    create_at     timestamp,
-    update_at     timestamp,
-    delete_at     timestamp
-);
-
-comment on table message_group_items is 'message-group-items表';
-
-comment on column message_group_items.id is '关联唯一ID';
-
-comment on column message_group_items.group_tags_id is '消息组topic ID';
-
-comment on column message_group_items.message_id is '消息ID';
-
-comment on column message_group_items.sort_order is '排序顺序';
-
-comment on column message_group_items.create_at is '创建时间';
-
-comment on column message_group_items.update_at is '更新时间';
-
-comment on column message_group_items.delete_at is '逻辑删除时间';
-
-alter table message_group_items
-    owner to postgres;
-
-create table message_group_tags
-(
-    id        bigint      not null
-        constraint pk_message_group_tags
-            primary key,
-    group_id  bigint      not null,
-    tag_name  varchar(50) not null
-        unique,
-    create_at timestamp,
-    update_at timestamp,
-    delete_at timestamp
-);
-
-comment on table message_group_tags is 'message-group-tags表';
-
-comment on column message_group_tags.id is '标签唯一ID';
-
-comment on column message_group_tags.group_id is '消息组ID';
-
-comment on column message_group_tags.tag_name is '标签名称';
-
-comment on column message_group_tags.create_at is '创建时间';
-
-comment on column message_group_tags.update_at is '更新时间';
-
-comment on column message_group_tags.delete_at is '逻辑删除时间';
-
-alter table message_group_tags
-    owner to postgres;
-
-create table messgae_groups
-(
-    id          bigint       not null
-        constraint pk_messgae_groups
-            primary key,
-    name        varchar(255) not null,
-    description text,
-    session_id  bigint,
-    is_active   boolean default true,
-    user_id     bigint       not null,
-    create_at   timestamp,
-    update_at   timestamp,
-    delete_at   timestamp
-);
-
-comment on table messgae_groups is 'messgae_groups表';
-
-comment on column messgae_groups.id is '消息组唯一ID';
-
-comment on column messgae_groups.name is '消息组名称';
-
-comment on column messgae_groups.description is '消息组描述';
-
-comment on column messgae_groups.session_id is '所属会话ID';
-
-comment on column messgae_groups.is_active is '是否活跃';
-
-comment on column messgae_groups.user_id is '创建人ID';
-
-comment on column messgae_groups.create_at is '创建时间';
-
-comment on column messgae_groups.update_at is '更新时间';
-
-comment on column messgae_groups.delete_at is '逻辑删除时间';
-
-alter table messgae_groups
-    owner to postgres;
-
-create table topic_relations
-(
-    id         bigint      not null
-        constraint pk_topic_relations
-            primary key,
-    parent_id  bigint      not null,
-    child_id   bigint      not null,
-    topic_name varchar(50) not null,
-    create_at  timestamp,
-    update_at  timestamp,
-    delete_at  timestamp
-);
-
-comment on table topic_relations is 'topic-relations表';
-
-comment on column topic_relations.id is '关联唯一ID';
-
-comment on column topic_relations.parent_id is '父话题ID';
-
-comment on column topic_relations.child_id is '子话题ID';
-
-comment on column topic_relations.topic_name is '话题名字';
-
-comment on column topic_relations.create_at is '创建时间';
-
-comment on column topic_relations.update_at is '更新时间';
-
-comment on column topic_relations.delete_at is '逻辑删除时间';
-
-alter table topic_relations
     owner to postgres;
 
 create table book_content_page
@@ -821,5 +662,44 @@ comment on column book_content_page.page is '当前页数（主要内容）只�
 alter table book_content_page
     owner to postgres;
 
--- hstore
-CREATE EXTENSION hstore;
+create table "Knowledge_base"
+(
+    id         bigint not null
+        constraint knowlege_base_pk
+            primary key,
+    summary    text,
+    "content " text,
+    create_at  timestamp,
+    update_at  timestamp,
+    delete_at  timestamp
+);
+
+comment on table "Knowledge_base" is '用户自定义添加的知识库';
+
+comment on column "Knowledge_base".summary is '知识库摘要';
+
+comment on column "Knowledge_base"."content " is '用户自定义添加的知识库';
+
+alter table "Knowledge_base"
+    owner to postgres;
+
+create table dynamic_prompt
+(
+    id              bigint not null
+        constraint dynamic_prompt_pk
+            primary key,
+    keywords        text,
+    prompt_tempalte text,
+    create_at       timestamp,
+    update_at       timestamp,
+    delete_at       timestamp
+);
+
+comment on table dynamic_prompt is '动态提示词';
+
+comment on column dynamic_prompt.prompt_tempalte is '提示词模板';
+
+alter table dynamic_prompt
+    owner to postgres;
+
+

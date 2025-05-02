@@ -44,8 +44,8 @@ public class Sessions extends BaseModel implements Serializable {
     /**
      * 是否归档
      */
-    @TableField("is_archived")
-    private Boolean isArchived;
+    @TableField("archived")
+    private Boolean archived;
 
     /**
      * 会话描述
@@ -58,5 +58,11 @@ public class Sessions extends BaseModel implements Serializable {
      */
     @TableField("metadata")
     private Object metadata;
+
+    /**
+     * 摘要
+     */
+    @TableField("summary")
+    private String summary;
 
 }

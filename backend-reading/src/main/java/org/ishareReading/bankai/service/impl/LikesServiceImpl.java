@@ -1,8 +1,6 @@
 package org.ishareReading.bankai.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.ishareReading.bankai.constant.RedisConstant;
 import org.ishareReading.bankai.exception.BusinessException;
 import org.ishareReading.bankai.mapper.LikesMapper;
@@ -36,14 +34,12 @@ import static org.ishareReading.bankai.constant.Constant.LIKE_ITEMS;
  */
 @Service
 public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements LikesService {
-    private static final Logger LOG = LogManager.getLogger(LikesServiceImpl.class);
 
     @Autowired
     private RedisCacheUtil redisCacheUtil;
 
     /**
-     * 采用什么数据结构？？ hashmap : 存储谁喜欢了
-     * 但是hashmap内存占比度相比zset还是太高了
+     * 采用什么数据结构？？ hashmap : 存储谁喜欢了 但是hashmap内存占比度相比zset还是太高了
      *
      * @param objectId
      * @param type
@@ -82,12 +78,11 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
 
 
     /**
-     * 获取关注的所有bean表
-     * 定时任务
-     * 异步处理
+     * 获取关注的所有bean表 定时任务 异步处理
      *
      * @param type
      * @param objectId
+     *
      * @return
      */
     @Async

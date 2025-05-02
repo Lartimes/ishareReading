@@ -10,6 +10,7 @@
         <result column="content" property="content" />
         <result column="token_count" property="tokenCount" />
         <result column="model" property="model" />
+        <result column="actived" property="actived" />
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />
         <result column="delete_at" property="deleteAt" />

@@ -54,7 +54,7 @@ public class IReadingApplication implements CommandLineRunner {
 //        InputStream inputStream = springAiResource.getInputStream();
 //        Object metadata = bookUtils.getMetadata(inputStream.readAllBytes());
 //        System.out.println(metadata);
-          hotRank.bookHotRank();
+        hotRank.bookHotRank();
     }
 
     @Bean

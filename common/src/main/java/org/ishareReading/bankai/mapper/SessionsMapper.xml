@@ -10,6 +10,7 @@
         <result column="agent_id" property="agentId" />
         <result column="is_archived" property="isArchived" />
         <result column="description" property="description" />
+        <result column="summary" property="summary" />
         <result column="metadata" property="metadata" />
         <result column="create_at" property="createAt" />
         <result column="update_at" property="updateAt" />

@@ -20,8 +20,8 @@ import java.util.Collection;
 public class CommonMapperAop {
 
     @Pointcut("execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) " +
+            "|| execution(* com.baomidou.mybatisplus.extension.service.IService.saveBatch(..)) ||" +
             " execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.updateById(..)) ||" +
-            " execution(* com.baomidou.mybatisplus.extension.service.IService.saveBatch(..)) ||" +
             " execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.update(..))")
     public void dbOperation() {
     }
@@ -34,7 +34,7 @@ public class CommonMapperAop {
             return;
         }
 
-        if ("insert".equals(methodName)) {
+        if ("insert".equals(methodName) || "saveBatch".equals(methodName)) {
             handleInsert(args);
         } else if (methodName.startsWith("update")) {
             handleUpdate(args);
@@ -46,7 +46,12 @@ public class CommonMapperAop {
             if (arg == null) {
                 continue;
             }
-            if (!(arg instanceof Collection<?> collection)) {
+            if (arg instanceof Collection<?> collection) {
+                // saveBatch的情况
+                for (Object item : collection) {
+                    injectCreateAndUpdateFields(item);
+                }
+            } else {
                 // insert单条的情况
                 injectCreateAndUpdateFields(arg);
             }

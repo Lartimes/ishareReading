@@ -52,4 +52,12 @@ public class Messages extends BaseModel implements Serializable {
      */
     @TableField("model")
     private String model;
+
+    /**
+     * 消息是否活跃 ？？ 间隔时间 ， token数量？
+     *  用户多少？
+     *  model 多少？
+     */
+    @TableField("actived")
+    private Boolean actived;
 }
