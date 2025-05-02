@@ -21,6 +21,7 @@ public class CommonMapperAop {
 
     @Pointcut("execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) " +
             " execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.updateById(..)) ||" +
+            " execution(* com.baomidou.mybatisplus.extension.service.IService.saveBatch(..)) ||" +
             " execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.update(..))")
     public void dbOperation() {
     }
