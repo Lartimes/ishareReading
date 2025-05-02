@@ -19,7 +19,6 @@ import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.ishare.oss.ObjectNameUtil;
 import org.ishare.oss.OssService;
 import org.ishareReading.bankai.constant.BucketConstant;
 import org.ishareReading.bankai.constant.RedisConstant;
@@ -47,7 +46,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -60,13 +63,13 @@ import java.util.stream.Collectors;
  */
 @Service
 public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements BooksService {
+    // 自定义线程池
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private final RedisTemplate redisTemplate;
-
     private final OssService ossService;
     private final FilesService filesService;
     private final OssService osService;
     private final BookContentPageMapper bookContentPageMapper;
-
     private final BookUtils bookUtils;
     private final ObjectMapper objectMapper;
     private final SqlSession sqlSession;
@@ -128,6 +131,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @SneakyThrows
     @Override
     public Response uploadOrUpdateBook(Books books) {
+        books.setUploadTime(LocalDateTime.now());
         boolean b = this.save(books);
         new Thread(() -> {
 //            ByteArrayInputStream pdfContent = new ByteArrayInputStream(bytes);
@@ -153,7 +157,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         return Response.success("添加成功");
     }
 
-
     /**
      * pdfbox 读取pdf获取元数据？？？ 且上传
      *
@@ -162,46 +165,73 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @SneakyThrows
     @Override
     public Response getMetadata(MultipartFile multipartFile) {
-//        这里进行文件转码处理都转成PDF/MD
+        System.out.println(System.currentTimeMillis());
         String contentType = multipartFile.getContentType();
         String originalFilename = multipartFile.getOriginalFilename();
         String extension = FileUtil.getExtension(originalFilename);
-        String dbType = FileUtil.detectFileType(multipartFile); //数据库对应的中文类型
-        InputStream inputStream = multipartFile.getInputStream();
-        byte[] bytes = inputStream.readAllBytes();
-        String coverageId = convertFirstPageToImage(new ByteArrayInputStream(bytes));
-        String bookPdfId = ObjectNameUtil.chunkSha256(inputStream);
-        if (!ossService.doesObjectExist(BucketConstant.COMMON_BUCKET_NAME, bookPdfId)) {
-            bookPdfId = ossService.upload(BucketConstant.COMMON_BUCKET_NAME, new ByteArrayInputStream(bytes), originalFilename);
-        }
-//        对直接流进行异步处理，存储每一页的内容和  todo 字节流？？？ 这个不太行啊，删掉吧 ， 存储内容就行了
+        String dbType = FileUtil.detectFileType(multipartFile);
+
+        // 读取一次字节流
+        byte[] bytes = multipartFile.getInputStream().readAllBytes();
+
+        // 异步处理图像转换
+        CompletableFuture<String> coverageIdFuture = CompletableFuture.supplyAsync(() -> {
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+                return convertFirstPageToImage(bis);
+            } catch (Exception e) {
+                // 更具体的异常处理
+                System.err.println("Error converting first page to image: " + e.getMessage());
+                return null;
+            }
+        }, EXECUTOR_SERVICE);
+        // 异步获取文件元数据
+        CompletableFuture<Object> metadataFuture = CompletableFuture.supplyAsync(() -> {
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+                return bookUtils.getMetadata(bis);
+            } catch (Exception e) {
+                System.err.println("Error getting file metadata: " + e.getMessage());
+                return null;
+            }
+        }, EXECUTOR_SERVICE);
+
+
+        // 异步处理文件上传
+        CompletableFuture<String> uploadFuture = CompletableFuture.supplyAsync(() -> {
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+                return ossService.upload(BucketConstant.COMMON_BUCKET_NAME, bis, originalFilename);
+            } catch (IOException e) {
+                System.err.println("Error uploading file: " + e.getMessage());
+                return null;
+            }
+        }, EXECUTOR_SERVICE);
+        System.out.println(System.currentTimeMillis());
+        // 保存文件信息
         Files bookFile = new Files();
         bookFile.setSize(multipartFile.getSize());
         bookFile.setType(dbType);
         bookFile.setFormat(contentType);
         bookFile.setFileName(originalFilename);
-        bookFile.setFilePath(bookPdfId);
+        bookFile.setFilePath(uploadFuture.get());
         bookFile.setExtension(extension);
         bookFile.setUserId(UserHolder.get());
         filesService.save(bookFile);
 
-
+        // 保存图片信息
         Files imgFile = new Files();
         imgFile.setFormat("image/jpeg");
         imgFile.setType("图片");
         imgFile.setFileName(Objects.requireNonNull(originalFilename).substring(0, originalFilename.lastIndexOf(".") + 1) + ".jpg");
-        imgFile.setFilePath(coverageId);
+        imgFile.setFilePath(coverageIdFuture.get());
         imgFile.setExtension("jpg");
         imgFile.setUserId(UserHolder.get());
         filesService.save(imgFile);
-        new ByteArrayInputStream(bytes);
-//        cover img id
-//        book id
-//      这里其实需要es pipeline处理缓存封面等页数的
-//        OSS拿吧，要么就book_content_page
-        Object metadata = bookUtils.getMetadata(bytes);
+
+        // 获取元数据
+        Object metadata = metadataFuture.get();
+
         record TMP(BookUtils.MetaData metaData, String imgId, String bookId) {
         }
+        System.out.println(System.currentTimeMillis());
         return Response.success(
                 new TMP((BookUtils.MetaData) metadata, imgFile.getId().toString(), bookFile.getId().toString()));
     }
@@ -379,17 +409,21 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         ArrayList<BooksInfoHomePage> result = new ArrayList<>(size);
         for (Books book : books) {
             byte[] coverageByes = null;
+            String coverageBase64 = null;
             Long coverImageId = book.getCoverImageId();
             Files coverage = filesService.getById(coverImageId);
             if (!ossService.doesObjectExist(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath())) {
                 BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
                         .eq(BookContentPage::getBookId, book.getId())
                         .eq(BookContentPage::getPage, 0));
+                if (bookContentPage == null) {
+                    continue;
+                }
                 coverageByes = bookContentPage.getPdfPageStream();
             } else {
                 coverageByes = osService.download(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath()).readAllBytes();
             }
-            String coverageBase64 = Base64.encodeBase64String(coverageByes);
+            coverageBase64 = coverageByes == null ? "" : Base64.encodeBase64String(coverageByes);
             result.add(new BooksService.BooksInfoHomePage(book, coverageBase64, null, null));
         }
         return result;

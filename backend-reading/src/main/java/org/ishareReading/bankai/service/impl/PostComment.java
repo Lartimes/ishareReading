@@ -19,23 +19,29 @@ public class PostComment implements CommentInterface {
 
     @Override
     public String getType() {
-        return "post";
+        return "posts";
     }
 
+    /**
+     * 只做二级
+     */
     @Override
     public Response getComment(Map<String, String> map) {
-        long postId = Long.parseLong(map.get("postId"));
+        long postId = Long.parseLong(map.get("id"));
 
-        // Get top level comments (reply_comment_id is null)
         List<Comments> topComments = commentsMapper.selectList(new LambdaQueryWrapper<Comments>()
                 .eq(Comments::getPostId, postId)
-                .isNull(Comments::getReplyCommentId)
+                        .and(wrapper -> wrapper.isNull(Comments::getReplyCommentId))
+                        .select(Comments::getId, Comments::getReplyCommentId , Comments::getLikeCount ,
+                                Comments::getContent ,Comments::getCreateAt , Comments::getUserId )
                 .orderByDesc(Comments::getCreateAt));
 
-        // Get second level comments for each top comment
+
         for (Comments topComment : topComments) {
             List<Comments> replies = commentsMapper.selectList(new LambdaQueryWrapper<Comments>()
                     .eq(Comments::getReplyCommentId, topComment.getId())
+                    .select(Comments::getId, Comments::getReplyCommentId , Comments::getLikeCount ,
+                                Comments::getContent ,Comments::getCreateAt , Comments::getUserId )
                     .orderByAsc(Comments::getCreateAt));
             topComment.setReplies(replies);
         }
@@ -48,19 +54,16 @@ public class PostComment implements CommentInterface {
         long commentId = Long.parseLong(map.get("id"));
         long userId = Long.parseLong(map.get("userId"));
 
-        // Check if it's a top level comment
         Comments comment = commentsMapper.selectById(commentId);
         if (comment == null || comment.getUserId() != userId) {
             return Response.fail("No permission to delete");
         }
 
         if (comment.getReplyCommentId() == null) {
-            // Delete all replies if it's top level
             commentsMapper.delete(new LambdaQueryWrapper<Comments>()
                     .eq(Comments::getReplyCommentId, commentId));
         }
 
-        // Delete the comment itselffiles
         int result = commentsMapper.deleteById(commentId);
         return result > 0 ? Response.success("Deleted successfully") : Response.fail("Delete failed");
     }
@@ -69,10 +72,9 @@ public class PostComment implements CommentInterface {
     public Response addComment(Map<String, String> map) {
         Comments comment = new Comments();
         comment.setUserId(Long.parseLong(map.get("userId")));
-        comment.setPostId(Long.parseLong(map.get("postId")));
-        comment.setContent(map.get("content"));
+        comment.setPostId(Long.parseLong(map.get("id")));
+        comment.setContent(map.get("text"));
 
-        // Set reply_comment_id if it's a reply
         String replyId = map.get("replyCommentId");
         if (replyId != null && !replyId.isEmpty()) {
             comment.setReplyCommentId(Long.parseLong(replyId));
@@ -80,7 +82,7 @@ public class PostComment implements CommentInterface {
 
         int result = commentsMapper.insert(comment);
         return result > 0 ?
-                Response.success(commentsMapper.selectById(comment.getId())) :
+                Response.success("添加成功") :
                 Response.fail("Add comment failed");
     }
 }

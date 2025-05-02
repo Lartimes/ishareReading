@@ -20,17 +20,16 @@ public class BookHomePage implements CommentInterface {
 
     @Override
     public String getType() {
-        return "book";
+        return "books";
     }
 
     //   todo  分页否? 有时间再写 先查所有
     @Override
     public Response getComment(Map<String, String> map) {
-        long bookId = Long.parseLong(map.get("bookId"));
+        long bookId = Long.parseLong(map.get("id"));
         Collection<BookOpinions> bookOpinions = bookOpinionsService.list(new LambdaQueryWrapper<BookOpinions>()
-                .eq(BookOpinions::getId, bookId)
                 .isNull(BookOpinions::getUnderlinedId)
-                //非具体页数的评论,作为书籍详情
+                .and(wrapper -> wrapper.eq(BookOpinions::getBookId, bookId))
                 .orderByDesc(BookOpinions::getCreateAt, BookOpinions::getUpdateAt));
         return Response.success(bookOpinions);
     }

@@ -10,25 +10,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * @author wüsch
- * @version 1.0
- * @description:
- * @since 2025/2/8 16:13
- */
 @Configuration
 public class ElasticSearchConfig {
-    @Value("${spring.data.elasticsearch.uri}")
+    @Value("${spring.elasticsearch.uris:}")
     private String uri;
 
     @Bean
     public ElasticsearchClient esClient() {
-        RestClient restClient = RestClient
-                .builder(HttpHost.create(uri))
+        RestClient restClient = RestClient.builder(
+                HttpHost.create(uri))
                 .build();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+
+        ElasticsearchTransport transport = new RestClientTransport(
+                restClient, new JacksonJsonpMapper());
         return new ElasticsearchClient(transport);
     }
-
-
 }

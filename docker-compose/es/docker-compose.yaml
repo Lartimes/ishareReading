@@ -1,7 +1,7 @@
 services:
   elasticsearch:
     restart: always
-    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/elasticsearch:8.6.2
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/elasticsearch:8.17.5
     container_name: elasticsearch
     privileged: true
     environment:

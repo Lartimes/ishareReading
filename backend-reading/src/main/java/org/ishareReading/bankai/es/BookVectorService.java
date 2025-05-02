@@ -2,10 +2,11 @@ package org.ishareReading.bankai.es;
 
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.KnnQuery;
+import co.elastic.clients.elasticsearch._types.KnnSearch;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -18,14 +19,14 @@ import java.util.stream.StreamSupport;
 public class BookVectorService {
 
     private static final String INDEX_NAME = "books_vector";
-    private final ElasticsearchClient elasticsearchClient;
+    private final ElasticsearchClient esClient;
     private final BookVectorRepository bookVectorRepository;
 
-
-    public BookVectorService(ElasticsearchClient elasticsearchClient, BookVectorRepository bookVectorRepository) {
-        this.elasticsearchClient = elasticsearchClient;
+    public BookVectorService(@Qualifier("esClient") ElasticsearchClient esClient, BookVectorRepository bookVectorRepository) {
+        this.esClient = esClient;
         this.bookVectorRepository = bookVectorRepository;
     }
+
 
     /**
      * 批量添加向量
@@ -55,22 +56,23 @@ public class BookVectorService {
 
     /**
      * KNN查询
-     *
      */
     public List<BookVector> knnSearch(Collection<BookVector> vectorList) {
-//        入参改成keywords， 《string》
         ArrayList<BookVector> result = new ArrayList<>();
-        for (BookVector wordVector : vectorList) {
-            KnnQuery knn = new KnnQuery.Builder().field("embedding")
-                    .queryVector(wordVector.buildVector())
-                    .k(20).numCandidates(100)
-                    .build();
-            SearchRequest searchRequest = SearchRequest.of(s -> s
+        for (BookVector bookVector : vectorList) {
+            KnnSearch knnSearch = KnnSearch.of(ks -> ks
+                    .field("embedding")
+                    .queryVector(bookVector.buildVector())
+                    .k(10)
+                    .numCandidates(100)
+                    .filter(Collections.emptyList()) // 这里示例设置为空列表，你可以根据需要添加过滤器
+            );
+            SearchRequest searchRequest = SearchRequest.of(sr -> sr
                     .index(INDEX_NAME)
-                    .knn(knn)
+                    .knn(Collections.singletonList(knnSearch))
             );
             try {
-                SearchResponse<Void> searchResponse = elasticsearchClient.search(searchRequest, Void.class);
+                SearchResponse<Void> searchResponse = esClient.search(searchRequest, Void.class);
                 List<Hit<Void>> hits = searchResponse.hits().hits();
                 Set<String> set = hits.stream().map(Hit::id).collect(Collectors.toSet());
                 Iterable<BookVector> wordVectors = bookVectorRepository.findAllById(set);
@@ -81,4 +83,5 @@ public class BookVectorService {
         }
         return result;
     }
+
 }

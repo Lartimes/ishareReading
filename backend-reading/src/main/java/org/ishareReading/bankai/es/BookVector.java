@@ -33,10 +33,10 @@ public class BookVector {
         this.embedding = embedding;
     }
 
-    public List<Double> buildVector() {
-        List<Double> result = new ArrayList<Double>();
+    public List<Float> buildVector() {
+        List<Float> result = new ArrayList<Float>();
         for (float v : embedding) {
-            result.add((double) v);
+            result.add(v);
         }
         return result;
     }

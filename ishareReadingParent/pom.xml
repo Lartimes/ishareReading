@@ -40,13 +40,11 @@
         <captcha.version>2.3.3</captcha.version>
         <oss.version>1.0.0</oss.version>
         <pdf.version>3.0.3</pdf.version>
-        <es.java.version>8.6.2</es.java.version>
+        <es.java.version>8.17.5</es.java.version>
     </properties>
 
     <dependencyManagement>
-        <!-- https://mvnrepository.com/artifact/com.alibaba.cloud/aliyun-oss-spring-boot-starter -->
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/co.elastic.clients/elasticsearch-java -->
             <dependency>
                 <groupId>co.elastic.clients</groupId>
                 <artifactId>elasticsearch-java</artifactId>

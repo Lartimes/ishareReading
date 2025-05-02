@@ -17,8 +17,8 @@ import java.util.Set;
 public class CommentAop {
 
     /// /            book_id , text , type = book / 还有帖子下面的评论comments / post_id , reply_id , text ,type= / 也同上
-    private static final Set<String> POST_COMMENTS = Set.of("type", "userId", "postId", "text"); //"replyCommentId"
-    private static final Set<String> BOOK_COMMENTS = Set.of("type", "userId", "bookId", "text");
+    private static final Set<String> POST_COMMENTS = Set.of("type", "userId", "id", "text"); //"replyCommentId"
+    private static final Set<String> BOOK_COMMENTS = Set.of("type", "userId", "id", "text");
 
 
     //    //    书籍的评论门户首页首页 book_opinions

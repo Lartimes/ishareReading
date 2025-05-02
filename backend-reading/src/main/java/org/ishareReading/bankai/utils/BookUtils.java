@@ -1,5 +1,6 @@
 package org.ishareReading.bankai.utils;
 
+import cn.hutool.core.date.DateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.pdfbox.Loader;
@@ -16,6 +17,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.ishareReading.bankai.model.TocItem;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
 
@@ -25,31 +27,43 @@ public class BookUtils {
     private static final int MAX_LEVEL = 3;
 
     @SneakyThrows
-    public Object getMetadata(byte[] bytes) {
-        try (PDDocument pdDocument = Loader.loadPDF(bytes)) {
+    public Object getMetadata(ByteArrayInputStream inputStream) {
+        try (PDDocument pdDocument = Loader.loadPDF(inputStream.readAllBytes())) {
+            // 获取页面数量
             int numberOfPages = pdDocument.getNumberOfPages();
+
+            // 转换书签为 JSON
             String bookMarks = convertBookmarksToJson(pdDocument);
+
+            // 获取文档信息
             PDDocumentInformation documentInformation = pdDocument.getDocumentInformation();
             String author = documentInformation.getAuthor();
             String title = documentInformation.getTitle();
-            Date time = documentInformation.getCreationDate().getTime();
-            int year = time.getYear();
+            Date creationDate = documentInformation.getCreationDate().getTime();
+            int year = DateUtil.year(creationDate);
+
+            // 获取文档语言
             PDDocumentCatalog documentCatalog = pdDocument.getDocumentCatalog();
             String language = documentCatalog.getLanguage();
+
+            // 提取文本
             PDFTextStripper stripper = new PDFTextStripper();
+            // 可根据需要设置提取范围
+            // stripper.setStartPage(1);
+            // stripper.setEndPage(numberOfPages);
             String text = stripper.getText(pdDocument);
 
-            // 提取 ISBN
-//            String isbn = extractISBN(text);
-            // 提取出版社
-//            String publisher = extractPublisher(text);
-            // 提取出版时间
-//            String publicationDate = extractPublicationDate(text);
-//    todo        图片大模型接口 + title + author ，
-//            让大模型返回元数据
-//            NLP 调优，进行这些分词等等
-            return new MetaData(author, String.valueOf(numberOfPages), "",
-                    "", "", year, title, language, bookMarks);
+            // 提取 ISBN、出版社、出版时间等信息
+            // String isbn = extractISBN(text);
+            // String publisher = extractPublisher(text);
+            // String publicationDate = extractPublicationDate(text);
+
+            return new MetaData(author, String.valueOf(numberOfPages), "", "",
+                    "", year, title, language, bookMarks);
+        } catch (IOException e) {
+            // 处理异常
+            System.err.println("Error extracting PDF metadata: " + e.getMessage());
+            return null;
         }
     }
 
@@ -115,7 +129,7 @@ public class BookUtils {
 //        name
 //        description
 //        total_pages
-//        language
+//        language 目录
     public record MetaData(String author, String pages, String description, String isbn,
                            String publisher, Integer publishDate, String title,
                            String language, String bookMarks) {

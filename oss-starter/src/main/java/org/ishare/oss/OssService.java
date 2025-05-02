@@ -52,7 +52,12 @@ public class OssService {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             key = ObjectNameUtil.chunkSha256(byteArrayInputStream);
             key += "_" + fileName;
-            client.putObject(bucketName, key, new ByteArrayInputStream(bytes));
+            if (doesObjectExist(bucket, key)) {
+                return key;
+            } else {
+                client.putObject(bucketName, key, new ByteArrayInputStream(bytes));
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -60,6 +65,19 @@ public class OssService {
         return key;
     }
 
+    /**
+     * Check if file exists in OSS
+     *
+     * @param bucket     bucket identifier
+     * @param objectName object name in OSS
+     *
+     * @return true if exists, false otherwise
+     */
+    public boolean doesObjectExist(String bucket, String objectName) {
+        OSS client = ossClients.get(bucket);
+        String bucketName = properties.getBuckets().get(bucket).getBucketName();
+        return client.doesObjectExist(bucketName, objectName);
+    }
 
     /**
      * Download file from OSS
@@ -106,20 +124,6 @@ public class OssService {
 
         ObjectListing objectListing = client.listObjects(request);
         return objectListing.getObjectSummaries();
-    }
-
-    /**
-     * Check if file exists in OSS
-     *
-     * @param bucket     bucket identifier
-     * @param objectName object name in OSS
-     *
-     * @return true if exists, false otherwise
-     */
-    public boolean doesObjectExist(String bucket, String objectName) {
-        OSS client = ossClients.get(bucket);
-        String bucketName = properties.getBuckets().get(bucket).getBucketName();
-        return client.doesObjectExist(bucketName, objectName);
     }
 
     /**

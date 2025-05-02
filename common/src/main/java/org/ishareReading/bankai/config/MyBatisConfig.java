@@ -56,20 +56,6 @@ public class MyBatisConfig {
         return entity -> IdUtil.getId();
     }
 
-//    @Bean("sqlSessionFactory")
-//    @Primary
-//    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-//        SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
-//        sessionFactory.setDataSource(dataSource);
-//        sessionFactory.setTypeHandlers(new MapTypeHandler());
-//        sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:org/ishareReading/bankai/mapper/*.xml"));
-//        MybatisConfiguration configuration = new MybatisConfiguration();
-//        configuration.setMapUnderscoreToCamelCase(true);
-//        configuration.setUseGeneratedKeys(true);
-//        configuration.setAutoMappingBehavior(AutoMappingBehavior.FULL);
-//        sessionFactory.setConfiguration(configuration);
-//        return sessionFactory.getObject();
-//    }
 
 
     @Bean("batchSqlSessionFactory")
@@ -79,7 +65,7 @@ public class MyBatisConfig {
         sqlSessionFactory.setDataSource(longConnectionDataSource);
         sqlSessionFactory.setGlobalConfig(globalConfig);
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        sqlSessionFactory.setMapperLocations(resolver.getResources("classpath:org/ishareReading/bankai/mapper/*.xml"));
+        sqlSessionFactory.setMapperLocations(resolver.getResources("classpath:**/mapper/*.xml"));
         MybatisConfiguration configuration = new MybatisConfiguration();
         configuration.setMapUnderscoreToCamelCase(true);
         configuration.setUseGeneratedKeys(false);

@@ -36,9 +36,11 @@ public class LoginListener {
     @SneakyThrows
     @EventListener(classes = Users.class)
     public void onLogin(Users users) {
+        System.out.println("监听到登陆事件");
         Long userId = users.getId();
         String userModelStr = redisCacheUtil.getKey(RedisConstant.USER_MODEL + userId);
-        if (userModelStr == null) {
+        System.out.println(userModelStr);
+        if (userModelStr.equals("null")) {
             UserModel userModel = new UserModel();
             userModel.setReadingTime(RANDOM.nextInt(1000, 5000));
             userModel.setReadingFrequency(RANDOM.nextInt(1, 7));

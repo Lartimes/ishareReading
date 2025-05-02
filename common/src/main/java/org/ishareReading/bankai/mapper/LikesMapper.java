@@ -1,7 +1,9 @@
 package org.ishareReading.bankai.mapper;
 
-import org.ishareReading.bankai.model.Likes;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.ishareReading.bankai.model.Likes;
+
+import java.util.Collection;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface LikesMapper extends BaseMapper<Likes> {
 
+        Integer insertBatchSomeColumn(Collection<Likes> entityList);
 }

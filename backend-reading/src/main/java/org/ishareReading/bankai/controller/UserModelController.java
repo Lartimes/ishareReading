@@ -57,19 +57,7 @@ public class UserModelController {
         Long userId = UserHolder.get();
         if (userId == null) {
 //            直接随同随机type books
-            List<String> keysByPrefix = redisCacheUtil.getKeysByPrefix(RedisConstant.BOOK_TYPE);
-            ArrayList<Long> longs = new ArrayList<>();
-            List<Long> pipelines = redisCacheUtil.pipeline((connection -> {
-                keysByPrefix.forEach(key -> {
-                    connection.zSetCommands().zRandMember(key.getBytes(StandardCharsets.UTF_8));
-                });
-                return null;
-            }));
-            List<Books> books = booksService.listByIds(pipelines);
-            List<BooksService.BooksInfoHomePage> booksInfoHomePages = booksService.convert2HomePage(books);
-            int pushSize = booksInfoHomePages.size();
-            booksInfoHomePages = pushSize > PUSH_SIZE ? booksInfoHomePages.subList(PUSH_SIZE, pushSize) : booksInfoHomePages;
-            return Response.success(booksInfoHomePages);
+            solve();
         }
         var objectCollection = redisCacheUtil.getZSetByKey(RedisConstant.BOOKS_HISTORY + userId);
         Set<Long> bookIds = objectCollection.stream()
@@ -79,10 +67,12 @@ public class UserModelController {
         String value = redisCacheUtil.getKey(RedisConstant.USER_MODEL + userId);
         UserModel userModel = objectMapper.readValue(value, UserModel.class);
         String[] strings = userModel.initBooksProbabilityArray();
+        if (Objects.isNull(strings)) {
+            solve();
+        }
         Random random = new Random();
         Collection<String> types = Arrays.stream(strings).collect(Collectors.toSet());
         int size = types.size();
-
         List<Types> similarTypes = typesMapper.findSimilarTypes(types, size + size >> 1);
         Set<String> collect = similarTypes.stream().map(Types::getTypeName).collect(Collectors.toSet());
         collect.removeAll(types); //删除概率数组中的，type库中随机拿
@@ -109,6 +99,25 @@ public class UserModelController {
         });
 
         List<Books> books = booksService.listByIds(ids);
+        List<BooksService.BooksInfoHomePage> booksInfoHomePages = booksService.convert2HomePage(books);
+        int pushSize = booksInfoHomePages.size();
+        booksInfoHomePages = pushSize > PUSH_SIZE ? booksInfoHomePages.subList(PUSH_SIZE, pushSize) : booksInfoHomePages;
+        return Response.success(booksInfoHomePages);
+    }
+
+    private Response<List<BooksService.BooksInfoHomePage>> solve() {
+        List<String> keysByPrefix = redisCacheUtil.getKeysByPrefix(RedisConstant.BOOK_TYPE);
+        List<Long> pipelines = redisCacheUtil.pipeline((connection -> {
+            keysByPrefix.forEach(key -> {
+                connection.zSetCommands().zRandMember(key.getBytes(StandardCharsets.UTF_8));
+            });
+            return null;
+        }));
+        Set<Long> set = new HashSet<>(pipelines);
+        if (set.isEmpty()) {
+            return Response.success(booksService.convert2HomePage(booksService.list()));
+        }
+        List<Books> books = booksService.listByIds(set);
         List<BooksService.BooksInfoHomePage> booksInfoHomePages = booksService.convert2HomePage(books);
         int pushSize = booksInfoHomePages.size();
         booksInfoHomePages = pushSize > PUSH_SIZE ? booksInfoHomePages.subList(PUSH_SIZE, pushSize) : booksInfoHomePages;

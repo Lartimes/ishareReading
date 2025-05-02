@@ -11,7 +11,6 @@ import org.ishareReading.bankai.nlp.WordVectorUtil;
 import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.AuthorService;
 import org.ishareReading.bankai.service.BooksService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -21,14 +20,14 @@ import java.util.*;
 public class IndexController {
     private final CommentAop commentAop;
     private final BookVectorService bookVectorService;
-    @Autowired
-    private BooksService booksService;
-    @Autowired
-    private AuthorService authorService;
+    private final BooksService booksService;
+    private final AuthorService authorService;
 
-    public IndexController(CommentAop commentAop, BookVectorService bookVectorService) {
+    public IndexController(CommentAop commentAop, BookVectorService bookVectorService, BooksService booksService, AuthorService authorService) {
         this.commentAop = commentAop;
         this.bookVectorService = bookVectorService;
+        this.booksService = booksService;
+        this.authorService = authorService;
     }
 
     public static void main(String[] args) {
@@ -41,7 +40,7 @@ public class IndexController {
      *
      * @return
      */
-    @PostMapping("/addComment")
+    @GetMapping("/getComment")
     public Response comment(@RequestBody Map<String, String> map) {
         return commentAop.getComment(map);
     }
@@ -54,12 +53,16 @@ public class IndexController {
     public Response search(@RequestParam String query) {
         if (query.trim().contains("@")) {
             List<Books> list = booksService.list(new LambdaQueryWrapper<Books>()
-                    .eq(Books::getAuthor, query));
+                    .eq(Books::getAuthor, query.substring(query.lastIndexOf("@") + 1)));
             return Response.success(booksService.convert2HomePage(list));
         } else if (query.trim().toUpperCase().contains("ISBN")) {
             Books one = booksService.getOne(new LambdaQueryWrapper<Books>()
-                    .eq(Books::getIsbn, query.trim().toUpperCase()));
-            return Response.success(booksService.convert2HomePage(Collections.singleton(one)));
+                    .eq(Books::getIsbn, query.trim().substring("ISBN".length()).toUpperCase()));
+            if (one != null) {
+                return Response.success(booksService.convert2HomePage(Collections.singleton(one)));
+            } else {
+                return Response.success("未查询到");
+            }
         }
         List<String> strings = SentenceUtil.split2stopWords(query);
         Collection<BookVector> bookVectors = WordVectorUtil.getInstance().generateVector(strings);
@@ -68,8 +71,14 @@ public class IndexController {
         searchResult.forEach(result -> {
             ids.addAll(result.getIds());
         });
-        List<Books> books = booksService.listByIds(ids);
-        return Response.success(booksService.convert2HomePage(books));
+        System.out.println(ids);
+        if (!ids.isEmpty()) {
+            List<Books> books = booksService.listByIds(ids);
+            return Response.success(booksService.convert2HomePage(books));
+        } else {
+            return Response.success("系统未查询到相关书籍");
+        }
+
     }
 
     /**
