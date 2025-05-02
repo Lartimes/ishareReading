@@ -47,11 +47,6 @@ public class Messages extends BaseModel implements Serializable {
     @TableField("token_count")
     private Integer tokenCount;
 
-    /**
-     * 使用的模型
-     */
-    @TableField("model")
-    private String model;
 
     /**
      * 消息是否活跃 ？？ 间隔时间 ， token数量？

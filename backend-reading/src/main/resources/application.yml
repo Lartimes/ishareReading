@@ -12,6 +12,11 @@ server:
     # 异步请求相关设置
     async-timeout: 300000 # 异步请求超时时间 5分钟
 spring:
+  ai:
+    dashscope:
+      api-key: sk-9f6e57e4b29540e2958f0a57f71fa143
+    openai:
+      api-key: sk-9f6e57e4b29540e2958f0a57f71fa143
   servlet:
     multipart:
       enabled: true

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.reflection.MetaObject;
 import org.ishare.oss.OssProperties;
-import org.ishareReading.bankai.schedul.HotRank;
+import org.ishareReading.bankai.scheduletasks.HotRank;
 import org.ishareReading.bankai.service.BookOpinionsService;
 import org.ishareReading.bankai.utils.BookUtils;
 import org.mybatis.spring.annotation.MapperScan;

@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("dynamic_prompt")
-public class DynamicPrompt {
+public class DynamicPrompt extends BaseModel implements Serializable {
     @TableField("keywords")
     private String keywords;
 

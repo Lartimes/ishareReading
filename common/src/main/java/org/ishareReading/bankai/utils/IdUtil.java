@@ -181,7 +181,7 @@ public class IdUtil {
             StringBuilder mpid = new StringBuilder();
             mpid.append(datacenterId);
             String name = ManagementFactory.getRuntimeMXBean().getName();
-            if (org.springframework.util.StringUtils.hasLength(name)) {
+            if (name != null && !name.isEmpty()) {
                 /*
                  * GET jvmPid
                  */

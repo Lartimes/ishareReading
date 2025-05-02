@@ -1,4 +1,4 @@
-package org.ishareReading.bankai.schedul;
+package org.ishareReading.bankai.scheduletasks;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

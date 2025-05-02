@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("knowledge_base")
-public class KnowledgeBase {
+public class KnowledgeBase extends BaseModel implements Serializable {
 
     @TableField("summary")
     private String summary;
