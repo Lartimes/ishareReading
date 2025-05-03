@@ -1,10 +1,7 @@
-package org.ishareReading.bankai.memory;
+package org.ishareReading.bankai.service.memory;
 
 import java.sql.Connection;
 
-/**
- * @author future0923
- */
 public class PostgresChatMemory extends JdbcChatMemory {
 
     private static final String JDBC_TYPE = "postgresql";
@@ -37,9 +34,7 @@ public class PostgresChatMemory extends JdbcChatMemory {
         return String.format("""
                         create table %s
                         (
-                            id          bigint      not null
-                                constraint pk_messages
-                                    primary key,
+                            id          bigint      not null primary key,
                             session_id  bigint      not null,
                             role        varchar(20) not null,
                             content     text        not null,

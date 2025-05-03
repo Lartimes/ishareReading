@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.ishareReading.bankai.config.JsonbTypeHandler;
 
 import java.io.Serializable;
 
@@ -18,6 +20,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @TableName("agents")
+@ToString
 public class Agents extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -42,7 +45,7 @@ public class Agents extends BaseModel implements Serializable {
     private String description;
 
     /**
-     * Agent 系统提示词
+     * Agent 系统提示词, 用户提示
      */
     @TableField("system_prompt")
     private String systemPrompt;
@@ -53,16 +56,18 @@ public class Agents extends BaseModel implements Serializable {
     @TableField("welcome_message")
     private String welcomeMessage;
 
+
+
     /**
      * 模型配置，包含模型类型、温度等参数
      */
-    @TableField("model_config")
+    @TableField(value = "model_config" , typeHandler = JsonbTypeHandler.class)
     private Object modelConfig;
 
     /**
      * Agent 可使用的工具列表
      */
-    @TableField("tools")
+    @TableField(value = "tools" , typeHandler = JsonbTypeHandler.class)
     private Object tools;
 
     /**

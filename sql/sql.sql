@@ -703,3 +703,7 @@ alter table dynamic_prompt
     owner to postgres;
 
 
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS hstore;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+

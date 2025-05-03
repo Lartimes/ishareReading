@@ -1,15 +1,16 @@
-package org.ishareReading.bankai.memory;
+package org.ishareReading.bankai.service.memory;
 
 import lombok.SneakyThrows;
-import org.ishareReading.bankai.util.TokenCountUtil;
 import org.ishareReading.bankai.utils.IdUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.*;
+import org.springframework.ai.tokenizer.JTokkitTokenCountEstimator;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class JdbcChatMemory implements ChatMemory, AutoCloseable {
@@ -17,6 +18,7 @@ public abstract class JdbcChatMemory implements ChatMemory, AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(JdbcChatMemory.class);
 
     private static final String DEFAULT_TABLE_NAME = "messages";
+    private static final JTokkitTokenCountEstimator TOKEN_COUNT_ESTIMATOR = new JTokkitTokenCountEstimator();
     private final Connection connection;
     private final String tableName;
 
@@ -47,7 +49,10 @@ public abstract class JdbcChatMemory implements ChatMemory, AutoCloseable {
 
     private void createTable() {
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute(createTableSql(tableName));
+            String tableSql = createTableSql(tableName);
+            System.out.println(tableSql);
+            stmt.execute(tableSql);
+
         } catch (Exception e) {
             throw new RuntimeException("Error creating table " + tableName + " ", e);
         }
@@ -73,11 +78,10 @@ public abstract class JdbcChatMemory implements ChatMemory, AutoCloseable {
         }
     }
 
-
     @SneakyThrows
     @Override
     public void add(String sessionId, List<Message> messages) {
-        logger.info("================custom 加入的消息:{}" , messages);
+        logger.info("================custom 加入的消息:{}", messages);
         for (Message message : messages) {
             String sql = "INSERT INTO " + tableName + " (id , session_id, role , content , token_count , create_at , actived) VALUES (?, ?, ? , ? , ?  , ? , ? )";
             try (PreparedStatement stmt = this.connection.prepareStatement(sql)) {
@@ -88,13 +92,32 @@ public abstract class JdbcChatMemory implements ChatMemory, AutoCloseable {
                 stmt.setString(3, type);
                 String text = message.getText();
                 stmt.setString(4, text);
-                int now = TokenCountUtil.countTokens(text);
+                int now = estimateTokens(Collections.singletonList(message));
                 stmt.setInt(5, now);
                 stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 stmt.setBoolean(7, isActived(type, now));
                 stmt.executeUpdate();
             }
         }
+    }
+
+    private int estimateTokens(List<Message> messages) {
+        return messages.stream()
+                .mapToInt(message -> TOKEN_COUNT_ESTIMATOR.estimate(message.getText()))
+                .sum();
+    }
+
+    private boolean isActived(String type, int count) {
+        if (type.equals(MessageType.ASSISTANT.name())) {
+            return count > 100;
+        } else if (type.equals(MessageType.SYSTEM.name())) {
+            return count > 100;
+        } else if (type.equals(MessageType.USER.name())) {
+            return count > 20;
+        } else if (type.equals(MessageType.TOOL.name())) {
+            return count > 40;
+        }
+        return false;
     }
 
     @Override
@@ -164,32 +187,30 @@ public abstract class JdbcChatMemory implements ChatMemory, AutoCloseable {
 
     @Override
     public void clear(String sessionId) {
-//        逻辑删除
-        String sql = "update " + tableName + "set delete_at = ? WHERE session_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            stmt.setString(2, sessionId);
-            stmt.executeUpdate();
-        } catch (Exception e) {
-            logger.error("Error clearing messages from {} chat memory", jdbcType(), e);
-            throw new RuntimeException("Error executing delete ", e);
+//        这里对短期表应该是直接删除，长期表逻辑删除，需要优化的
+        String sql = null;
+        if (tableName.contains("long")) {
+            sql = "update " + tableName + "set delete_at = ? WHERE session_id = ? ;";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                stmt.setLong(2, Long.parseLong(sessionId));
+                stmt.executeUpdate();
+            } catch (Exception e) {
+                throw new RuntimeException("Error executing delete ", e);
+            }
+        } else {
+            sql = "delete  from " + tableName + " WHERE  session_id = ? ;";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setLong(1, Long.parseLong(sessionId));
+                stmt.executeUpdate();
+            } catch (Exception e) {
+                throw new RuntimeException("Error executing delete ", e);
+            }
         }
+
 
     }
 
     protected abstract String jdbcType();
-
-    private boolean isActived(String type, int count) {
-        if (type.equals(MessageType.ASSISTANT.name())) {
-            return count > 100;
-        } else if (type.equals(MessageType.SYSTEM.name())) {
-            return count > 100;
-        } else if (type.equals(MessageType.USER.name())) {
-            return count > 20;
-        } else if (type.equals(MessageType.TOOL.name())) {
-            return count > 40;
-        }
-        return false;
-    }
 
 }

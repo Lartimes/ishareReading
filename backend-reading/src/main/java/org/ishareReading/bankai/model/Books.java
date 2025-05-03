@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.ishareReading.bankai.config.MapTypeHandler;
+import org.ishareReading.bankai.config.JsonbTypeHandler;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -132,7 +132,7 @@ public class Books extends BaseModel implements Serializable {
     @TableField("file_id")
     private Long fileId;
 
-    @TableField(value = "structure" , typeHandler = MapTypeHandler.class)
+    @TableField(value = "structure" , typeHandler = JsonbTypeHandler.class)
     private Object structure;
 
 
