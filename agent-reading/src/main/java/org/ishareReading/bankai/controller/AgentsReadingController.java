@@ -27,7 +27,6 @@ public class AgentsReadingController {
                                                        HttpServletResponse response) {
         response.setCharacterEncoding("UTF-8");
         Long userId = UserHolder.get();
-        userId = 1L;
         Flux<ChatResponse> flux = agentsService.readingByName(sessionId, name, userId, userInput);
         return SSEUtils.result(flux);
     }
