@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         LOG.info("加载拦截器");
-        registry.addInterceptor(this.tokenInterceptor);
+//        registry.addInterceptor(this.tokenInterceptor);
 //                .addPathPatterns("/**")
 //                .excludePathPatterns("/index/**"
 //                ,"/login/**");
