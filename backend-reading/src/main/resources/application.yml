@@ -32,10 +32,10 @@ spring:
   #    redis配置
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST:localhost}
       port: 6379
   elasticsearch:
-    uris: http://localhost:9200
+    uris: ${ES_HOST:http://localhost:9200}
   #      spring servlet 虚拟线程开启
   threads:
     virtual:
