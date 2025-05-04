@@ -256,10 +256,10 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         InputStream download = osService.download(BucketConstant.COMMON_BUCKET_NAME, filePath);
         byte[] bytes = download.readAllBytes();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        FileOutputStream fileOutputStream = new FileOutputStream("./out.pdf");
-        fileOutputStream.write(byteArrayInputStream.readAllBytes());
-        fileOutputStream.flush();
-        fileOutputStream.close();
+//        FileOutputStream fileOutputStream = new FileOutputStream("./out.pdf");
+//        fileOutputStream.write(byteArrayInputStream.readAllBytes());
+//        fileOutputStream.flush();
+//        fileOutputStream.close();
 
 
         try (PDDocument pdDocument = Loader.loadPDF(bytes)) {
