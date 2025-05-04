@@ -13,6 +13,9 @@ target/
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+*iml
+
+
 # Package Files #
 *.jar
 *.war
@@ -26,5 +29,16 @@ target/
 hs_err_pid*
 replay_pid*
 
-
-test
+# Vue.js 相关忽略规则
+# 依赖目录
+node_modules/
+# 构建输出目录
+dist/
+# 缓存目录
+.cache/
+# 本地环境变量
+.env.*
+# IDE 配置文件
+.vscode/
+# Vue CLI 生成的临时文件
+*.local
