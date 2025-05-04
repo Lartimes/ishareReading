@@ -2,10 +2,22 @@ server:
   port: 8080
   servlet:
     context-path: /ishareReading
+
+  tomcat:
+    threads:
+      max: 200 # 最大工作线程数
+    connection-timeout: 20000 # 连接超时毫秒
+    max-connections: 10000 # 最大连接数
+    accept-count: 100 # 等待队列长度
+    # 异步请求相关设置
+    async-timeout: 300000 # 异步请求超时时间 5分钟
 spring:
-  mvc:
-    async:
-      request-timeout: 60000 # 例如，设置为60秒
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+
   application:
     name: agent-reading
   datasource:
@@ -22,6 +34,7 @@ spring:
       pgvector:
         dimensions: 1536
     dashscope:
+
       rerank:
         options:
           model: gte-rerank-v2

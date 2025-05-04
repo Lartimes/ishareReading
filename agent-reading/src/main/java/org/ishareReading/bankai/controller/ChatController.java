@@ -5,6 +5,8 @@ import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.dashscope.rerank.DashScopeRerankModel;
 import jakarta.servlet.http.HttpServletResponse;
 import org.ishareReading.bankai.config.PromptConfig;
+import org.ishareReading.bankai.model.Agents;
+import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.util.SSEUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -59,8 +61,16 @@ public class ChatController {
         this.rerankModel = rerankModel;
     }
 
+    @GetMapping("/getAgents")
+    public Response getAgents() {
+        Agents agents = new Agents();
+        agents.setName("聊天机器人");
+        agents.setWelcomeMessage("我是ishareReading的解忧小助手哦哦😎😎😎");
+        return  Response.success(agents);
+    }
+
     @GetMapping("/chatTest")
-    public Flux<ServerSentEvent<String>> chatTest(@RequestParam("sessionId") String chatId,
+    public Flux<ServerSentEvent<String>> chatTest(@RequestParam(value = "sessionId") String chatId,
                                                   @RequestParam("content") String content,
                                                   HttpServletResponse response) {
         String advise = """
@@ -82,4 +92,6 @@ public class ChatController {
                 }).stream().chatResponse();
         return SSEUtils.result(flux);
     }
+
+
 }

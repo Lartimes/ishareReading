@@ -139,7 +139,7 @@ public class ScheduledTasks {
             Long count = likesService.count(new LambdaQueryWrapper<Likes>()
                     .eq(Likes::getObjectId, bookId)
                     .eq(Likes::getType, "books"));
-            if (count != null && count != 0L) {
+            if (count != 0L) {
                 long loops = 1L;
                 long tmp = count / PAGE_SIZE;
                 if (tmp > 0) {

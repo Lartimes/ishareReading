@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ishareReading.bankai.config.VectorTypeHandler;
 
 import java.io.Serializable;
 
@@ -19,4 +20,7 @@ public class KnowledgeBase extends BaseModel implements Serializable {
 
     @TableField("content")
     private String content;
+
+    @TableField(value = "embedding" , typeHandler = VectorTypeHandler.class)
+    private float[] embedding;
 }

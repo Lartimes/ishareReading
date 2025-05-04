@@ -8,6 +8,7 @@ import org.ishareReading.bankai.model.Books;
 import org.ishareReading.bankai.model.Posts;
 import org.ishareReading.bankai.model.UserModel;
 import org.ishareReading.bankai.model.Users;
+import org.ishareReading.bankai.service.AgentsService;
 import org.ishareReading.bankai.utils.RedisCacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -25,6 +26,9 @@ public class LoginListener {
     private RedisCacheUtil redisCacheUtil;
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AgentsService agentsService;
 
     /**
      *  1.初始化模型
@@ -70,5 +74,7 @@ public class LoginListener {
         userModel.setBookTypes(set2);
         userModel.setPostTypes(set1);
         redisCacheUtil.set(RedisConstant.USER_MODEL + userId, objectMapper.writeValueAsString(userModel));
+        //注册agents
+        agentsService.registerAgentsByUserId(userId);
     }
 }

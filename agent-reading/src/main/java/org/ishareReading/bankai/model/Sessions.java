@@ -35,11 +35,6 @@ public class Sessions extends BaseModel implements Serializable {
     @TableField("user_id")
     private Long userId;
 
-    /**
-     * 关联的agentId
-     */
-    @TableField("agent_id")
-    private Long agentId;
 
     /**
      * 是否归档
