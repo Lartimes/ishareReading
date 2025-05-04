@@ -131,6 +131,7 @@ public class UserModelController {
     @GetMapping("/pushPostsByModel")
     public Response pushPosts() {
         Long userId = UserHolder.get();
+        userId = null;
         if (userId == null) {
             List<Posts> list = postsService.list();
             Collections.shuffle(list);
