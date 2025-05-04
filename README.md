@@ -108,7 +108,7 @@ ishareReading/
 - **后端框架**: Spring Boot 3.3.4 、MyBatis-Plus 3.5.5
 - **AI 框架**: Spring AI 1.0.0-M6,Spring AI Alibaba 1.0.0-M6.1
 - **数据库、搜索引擎**: PostgreSQL 17.x, PgVector 、Elasticsearch 8.17.5
-- - **LLM** : HaNLP portable-1.8.6、支持多种 DashScope Model、OpenAI Model
+- **LLM** : HaNLP portable-1.8.6、支持多种 DashScope Model、OpenAI Model
 
 ## 🚀 快速开始
 
