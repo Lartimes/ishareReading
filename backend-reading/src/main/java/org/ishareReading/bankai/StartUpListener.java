@@ -32,7 +32,6 @@ public class StartUpListener implements CommandLineRunner {
         agentsByUserId.forEach((k, v) -> System.out.println(k + ":" + v));
         System.out.println(redisHost);
         System.out.println(redisTemplate);
-        redisTemplate.opsForValue().set("a" , "b");
         System.out.println(redisTemplate.getClientList());
         System.out.println(elasticsearchClient);
     }

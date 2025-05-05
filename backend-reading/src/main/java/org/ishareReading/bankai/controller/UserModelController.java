@@ -1,5 +1,6 @@
 package org.ishareReading.bankai.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.ishareReading.bankai.constant.RedisConstant;
@@ -57,23 +58,33 @@ public class UserModelController {
         Long userId = UserHolder.get();
         if (userId == null) {
 //            直接随同随机type books
-            solve();
+            return solve();
         }
         var objectCollection = redisCacheUtil.getZSetByKey(RedisConstant.BOOKS_HISTORY + userId);
         Set<Long> bookIds = objectCollection.stream()
                 .filter(Objects::nonNull)
-                .map(obj -> Long.parseLong((String) obj))
+                .map(obj -> Long.parseLong(obj.toString()))
                 .collect(Collectors.toSet());
+
         String value = redisCacheUtil.getKey(RedisConstant.USER_MODEL + userId);
         UserModel userModel = objectMapper.readValue(value, UserModel.class);
+        if(userModel == null) {
+            return  solve();
+        }
         String[] strings = userModel.initBooksProbabilityArray();
         if (Objects.isNull(strings)) {
-            solve();
+            return  solve();
         }
         Random random = new Random();
         Collection<String> types = Arrays.stream(strings).collect(Collectors.toSet());
         int size = types.size();
-        List<Types> similarTypes = typesMapper.findSimilarTypes(types, size + size >> 1);
+        String typeNames = types.stream()
+                .map(name -> "'" + name + "'")
+                .collect(Collectors.joining(","));
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("typeNames", typeNames);
+        map.put("size", size + size >> 1);
+        List<Types> similarTypes = typesMapper.findSimilarTypes(map);
         Set<String> collect = similarTypes.stream().map(Types::getTypeName).collect(Collectors.toSet());
         collect.removeAll(types); //删除概率数组中的，type库中随机拿
         ArrayList<String> pushTypes = new ArrayList<>();
@@ -83,9 +94,11 @@ public class UserModelController {
             pushTypes.add(strings[index]);
         }
         pushTypes.addAll(collect);
+        System.out.println(pushTypes);
         List<String> list = pushTypes.stream().map(a -> RedisConstant.BOOK_TYPE + a).toList();
         //即将推荐的书籍IDS
         Set<Long> ids = redisCacheUtil.sRandom(list).stream()
+                .filter(Objects::nonNull)
                 .map(id -> Long.parseLong(id.toString()))
                 .filter(a -> !bookIds.contains(a))
                 .collect(Collectors.toSet());
@@ -97,7 +110,9 @@ public class UserModelController {
             });
             return null;
         });
-
+        if(ids.isEmpty()){
+            return solve();
+        }
         List<Books> books = booksService.listByIds(ids);
         List<BooksService.BooksInfoHomePage> booksInfoHomePages = booksService.convert2HomePage(books);
         int pushSize = booksInfoHomePages.size();
@@ -115,7 +130,7 @@ public class UserModelController {
         }));
         Set<Long> set = new HashSet<>(pipelines);
         if (set.isEmpty()) {
-            return Response.success(booksService.convert2HomePage(booksService.list()));
+            return Response.success(booksService.convert2HomePage(booksService.list(new LambdaQueryWrapper<>())));
         }
         List<Books> books = booksService.listByIds(set);
         List<BooksService.BooksInfoHomePage> booksInfoHomePages = booksService.convert2HomePage(books);

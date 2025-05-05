@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPa
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.ishareReading.bankai.model.TocItem;
 import org.springframework.stereotype.Component;
 
@@ -31,41 +30,76 @@ public class BookUtils {
         try (PDDocument pdDocument = Loader.loadPDF(inputStream.readAllBytes())) {
             // 获取页面数量
             int numberOfPages = pdDocument.getNumberOfPages();
-
-            // 转换书签为 JSON
-            String bookMarks = convertBookmarksToJson(pdDocument);
-
-            // 获取文档信息
             PDDocumentInformation documentInformation = pdDocument.getDocumentInformation();
             String author = documentInformation.getAuthor();
             String title = documentInformation.getTitle();
             Date creationDate = documentInformation.getCreationDate().getTime();
             int year = DateUtil.year(creationDate);
-
-            // 获取文档语言
             PDDocumentCatalog documentCatalog = pdDocument.getDocumentCatalog();
             String language = documentCatalog.getLanguage();
-
-            // 提取文本
-            PDFTextStripper stripper = new PDFTextStripper();
+//            PDFTextStripper stripper = new PDFTextStripper();
             // 可根据需要设置提取范围
             // stripper.setStartPage(1);
             // stripper.setEndPage(numberOfPages);
-            String text = stripper.getText(pdDocument);
+//            String text = stripper.getText(pdDocument);
 
             // 提取 ISBN、出版社、出版时间等信息
             // String isbn = extractISBN(text);
             // String publisher = extractPublisher(text);
             // String publicationDate = extractPublicationDate(text);
-
+//            String s = convertBookmarksToJson(pdDocument); //获取目录结构
+            String s = convertBookmarksToTree(pdDocument);
             return new MetaData(author, String.valueOf(numberOfPages), "", "",
-                    "", year, title, language, bookMarks);
+                    "", year, title, language, s);
         } catch (IOException e) {
             // 处理异常
             System.err.println("Error extracting PDF metadata: " + e.getMessage());
             return null;
         }
     }
+
+    @SneakyThrows
+    public String convertToBookDir(ByteArrayInputStream inputStream) {
+        try (PDDocument pdDocument = Loader.loadPDF(inputStream.readAllBytes())) {
+            return convertBookmarksToJson(pdDocument);
+        }
+    }
+
+
+    public static String convertBookmarksToTree(PDDocument document) throws IOException {
+        PDDocumentOutline outline = document.getDocumentCatalog().getDocumentOutline();
+        if (outline == null) {
+            return "";
+        }
+        StringBuilder treeText = new StringBuilder();
+        buildTreeText(outline.getFirstChild(), document, treeText, 0);
+        return treeText.toString();
+    }
+
+    private static void buildTreeText(PDOutlineItem item, PDDocument document, StringBuilder treeText, int level) {
+        if (level >= MAX_LEVEL || item == null) {
+            return;
+        }
+        String indent = "  ".repeat(level);
+        int page = getPageNumber(item, document);
+        treeText.append(indent).append(item.getTitle());
+        if (page != -1) {
+            treeText.append(" (Page ").append(page).append(")");
+        }
+        treeText.append("\n");
+
+        buildTreeText(item.getFirstChild(), document, treeText, level + 1);
+        buildTreeText(item.getNextSibling(), document, treeText, level);
+    }
+
+    private static int getPageNumber(PDOutlineItem item, PDDocument document) {
+        try {
+            return document.getPages().indexOf(item.findDestinationPage(document)) + 1;
+        } catch (IOException e) {
+            return -1;
+        }
+    }
+
 
     /**
      * 获取三级目录json格式数组

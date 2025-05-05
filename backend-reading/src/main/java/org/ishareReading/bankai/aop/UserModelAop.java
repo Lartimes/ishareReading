@@ -73,14 +73,17 @@ public class UserModelAop {
         boolean flag = false;
         Set<UserModel.TypeScore<Books>> bookTypes = userModel.getBookTypes();
         for (UserModel.TypeScore<Books> bookType : bookTypes) {
-            if (Objects.equals(bookType.t.getId(), bookId)) { //如果存在之前的book 直接修改model
-                bookType.score += score;
-                flag = true;
-                break;
+            if (bookType.t != null) {
+                if (Objects.equals(bookType.t.getId(), bookId)) { //如果存在之前的book 直接修改model
+                    bookType.score += score;
+                    flag = true;
+                    break;
+                }
             }
         }
         if (!flag) {
             Books books = booksService.getById(bookId);
+            books.setStructure("");
             bookTypes.add(new UserModel.TypeScore<>(books, score, 1));
         }
         userModel.setBookTypes(bookTypes);
@@ -98,36 +101,37 @@ public class UserModelAop {
         try {
             Long userId = UserHolder.get();
 
-            new Thread(() -> {
-                try {
-                    Signature signature = joinPoint.getSignature();
-                    String methodName = signature.getName();
-                    String value = redisCacheUtil.getKey(RedisConstant.USER_MODEL + userId);
-                    UserModel userModel = objectMapper.readValue(value, UserModel.class);
-                    if ("getBooksInfoById".equals(methodName)) { //阅读
-                        Long bookId = (Long) joinPoint.getArgs()[0];
-                        updateModel(userModel, bookId, userId, UserModelConstant.READING.VIEW);
-                    } else if ("getBooksInfoReadingModeById".equals(methodName)) { //进行阅读
-                        Long bookId = (Long) joinPoint.getArgs()[0];
-                        updateModel(userModel, bookId, userId, UserModelConstant.READING.READ);
-                    } else if ("markBook".equals(methodName)) {
-                        BookUnderlineCoordinates underlineCoordinates = (BookUnderlineCoordinates) joinPoint.getArgs()[0];
-                        Long bookId = underlineCoordinates.getBookId();
-                        updateModel(userModel, bookId, userId, UserModelConstant.READING.MARK);
-                    } else if ("doOrUndoFavorite".equals(methodName)) {
-//                        @PathVariable String type, @PathVariable Long id)
-                        Object[] args = joinPoint.getArgs();
-                        String type = (String) args[0];
-                        Long id = (Long) args[1];
-                        if ("books".equals(type)) {
-                            updateModel(userModel, id, userId, UserModelConstant.READING.STAR);
-                        } else if ("posts".equals(type)) {
-                            updatePostsModel(userModel, id, userId, UserModelConstant.READING.STAR);
-                        }
-                    }
-                } catch (JsonProcessingException ignore) {
+            try {
+                Signature signature = joinPoint.getSignature();
+                String methodName = signature.getName();
+                String value = redisCacheUtil.getKey(RedisConstant.USER_MODEL + userId);
+                UserModel userModel = objectMapper.readValue(value, UserModel.class);
+                if(userModel == null){
+                    return joinPoint.proceed();
                 }
-            }).start();
+                if ("getBooksInfoById".equals(methodName)) { //阅读
+                    Long bookId = (Long) joinPoint.getArgs()[0];
+                    updateModel(userModel, bookId, userId, UserModelConstant.READING.VIEW);
+                } else if ("getBooksInfoReadingModeById".equals(methodName)) { //进行阅读
+                    Long bookId = (Long) joinPoint.getArgs()[0];
+                    updateModel(userModel, bookId, userId, UserModelConstant.READING.READ);
+                } else if ("markBook".equals(methodName)) {
+                    BookUnderlineCoordinates underlineCoordinates = (BookUnderlineCoordinates) joinPoint.getArgs()[0];
+                    Long bookId = underlineCoordinates.getBookId();
+                    updateModel(userModel, bookId, userId, UserModelConstant.READING.MARK);
+                } else if ("doOrUndoFavorite".equals(methodName)) {
+//                        @PathVariable String type, @PathVariable Long id)
+                    Object[] args = joinPoint.getArgs();
+                    String type = (String) args[0];
+                    Long id = (Long) args[1];
+                    if ("books".equals(type)) {
+                        updateModel(userModel, id, userId, UserModelConstant.READING.STAR);
+                    } else if ("posts".equals(type)) {
+                        updatePostsModel(userModel, id, userId, UserModelConstant.READING.STAR);
+                    }
+                }
+            } catch (JsonProcessingException ignore) {
+            }
             return joinPoint.proceed();
         } catch (Throwable ignored) {
         }
@@ -139,11 +143,14 @@ public class UserModelAop {
         boolean flag = false;
         Set<UserModel.TypeScore<Posts>> postTypes = userModel.getPostTypes();
         for (UserModel.TypeScore<Posts> postsTypeScore : postTypes) {
-            if (Objects.equals(postsTypeScore.t.getId(), postId)) { //如果存在之前的book 直接修改model
-                postsTypeScore.score += UserModelConstant.POST.STAR;
-                flag = true;
-                break;
+            if (postsTypeScore.t != null) {
+                if (Objects.equals(postsTypeScore.t.getId(), postId)) { //如果存在之前的book 直接修改model
+                    postsTypeScore.score += UserModelConstant.POST.STAR;
+                    flag = true;
+                    break;
+                }
             }
+
         }
         if (!flag) {
             Posts posts = postsService.getById(postId);

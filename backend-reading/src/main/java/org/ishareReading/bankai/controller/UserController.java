@@ -1,7 +1,11 @@
 package org.ishareReading.bankai.controller;
 
+import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Base64;
+import org.ishare.oss.OssService;
 import org.ishareReading.bankai.aop.CommentAop;
 import org.ishareReading.bankai.aop.FollowOrSubscribeAop;
+import org.ishareReading.bankai.constant.BucketConstant;
 import org.ishareReading.bankai.holder.UserHolder;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.response.Response;
@@ -12,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,6 +39,8 @@ public class UserController {
 //        usersService.followUsers();
 //    }
 
+    @Autowired
+    private OssService ossService;
     /**
      * 根据用户id查看个人信息
      *
@@ -41,11 +48,16 @@ public class UserController {
      *
      * @return
      */
+    @SneakyThrows
     @GetMapping("/personalInfo")
     public Response getPersonalInfo(@RequestParam("userId") Long userId) {
         Users byId = usersService.getById(userId);
         if (byId == null) {
             return Response.fail("不存在该用户");
+        }
+        if(byId.getAvatar() != null) {
+            InputStream download = ossService.download(BucketConstant.COMMON_BUCKET_NAME, byId.getAvatar());
+            byId.setAvatarBase64(Base64.encodeBase64String(download.readAllBytes()));
         }
         byId.setPassword(null);
         return Response.success(byId);

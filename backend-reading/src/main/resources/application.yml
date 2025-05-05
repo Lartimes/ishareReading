@@ -47,7 +47,7 @@ spring:
     code-validation: 5
     host: smtp.qq.com
     username: mingdongiloveu2@qq.com
-    password: "ftdjymtxojmpcihc"
+    password: bidonaeuubiqchca
     port: 465
     default-encoding: UTF-8
     protocol: smtps

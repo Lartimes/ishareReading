@@ -28,10 +28,7 @@ import org.ishareReading.bankai.mapper.BookContentPageMapper;
 import org.ishareReading.bankai.mapper.BooksMapper;
 import org.ishareReading.bankai.model.*;
 import org.ishareReading.bankai.response.Response;
-import org.ishareReading.bankai.service.BookOpinionsService;
-import org.ishareReading.bankai.service.BookUnderlineCoordinatesService;
-import org.ishareReading.bankai.service.BooksService;
-import org.ishareReading.bankai.service.FilesService;
+import org.ishareReading.bankai.service.*;
 import org.ishareReading.bankai.utils.BookUtils;
 import org.ishareReading.bankai.utils.FileUtil;
 import org.ishareReading.bankai.utils.IdUtil;
@@ -76,8 +73,13 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     private final BookUnderlineCoordinatesService bookUnderlineCoordinatesService;
     private final BookOpinionsService bookOpinionsService;
     private final RedisCacheUtil redisCacheUtil;
+    private final BookContentPageService bookContentPageService;
 
-    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService, BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper, SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService, BookOpinionsService bookOpinionsService, RedisCacheUtil redisCacheUtil, RedisCacheUtil redisCacheUtil1) {
+    public BooksServiceImpl(OssService ossService, RedisTemplate redisTemplate, FilesService filesService, OssService osService,
+                            BookContentPageMapper bookContentPageMapper, BookUtils bookUtils, ObjectMapper objectMapper,
+                            SqlSession sqlSession, BookUnderlineCoordinatesService bookUnderlineCoordinatesService,
+                            BookOpinionsService bookOpinionsService,
+                            RedisCacheUtil redisCacheUtil, BookContentPageService bookContentPageService) {
         this.ossService = ossService;
         this.redisTemplate = redisTemplate;
         this.filesService = filesService;
@@ -88,7 +90,8 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         this.sqlSession = sqlSession;
         this.bookUnderlineCoordinatesService = bookUnderlineCoordinatesService;
         this.bookOpinionsService = bookOpinionsService;
-        this.redisCacheUtil = redisCacheUtil1;
+        this.redisCacheUtil = redisCacheUtil;
+        this.bookContentPageService = bookContentPageService;
     }
 
     public static void main(String[] args) throws Exception {
@@ -133,11 +136,12 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     public Response uploadOrUpdateBook(Books books) {
         books.setUploadTime(LocalDateTime.now());
         boolean b = this.save(books);
+        Long pk = books.getId();
         new Thread(() -> {
 //            ByteArrayInputStream pdfContent = new ByteArrayInputStream(bytes);
             //TODO 异步进行数据内容处理？？、
             if (b) {
-                this.insertContestPages(books.getFileId(), books.getTotalPages());
+                this.insertContestPages(pk, books.getFileId(), books.getTotalPages());
                 //更新系统书籍类型库
                 if (books.getGenre() != null) {
                     String[] genreSplit = books.getGenreSplit();
@@ -165,26 +169,21 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @SneakyThrows
     @Override
     public Response getMetadata(MultipartFile multipartFile) {
-        System.out.println(System.currentTimeMillis());
         String contentType = multipartFile.getContentType();
         String originalFilename = multipartFile.getOriginalFilename();
         String extension = FileUtil.getExtension(originalFilename);
         String dbType = FileUtil.detectFileType(multipartFile);
 
-        // 读取一次字节流
         byte[] bytes = multipartFile.getInputStream().readAllBytes();
 
-        // 异步处理图像转换
         CompletableFuture<String> coverageIdFuture = CompletableFuture.supplyAsync(() -> {
             try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
                 return convertFirstPageToImage(bis);
             } catch (Exception e) {
-                // 更具体的异常处理
                 System.err.println("Error converting first page to image: " + e.getMessage());
                 return null;
             }
         }, EXECUTOR_SERVICE);
-        // 异步获取文件元数据
         CompletableFuture<Object> metadataFuture = CompletableFuture.supplyAsync(() -> {
             try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
                 return bookUtils.getMetadata(bis);
@@ -194,8 +193,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             }
         }, EXECUTOR_SERVICE);
 
-
-        // 异步处理文件上传
         CompletableFuture<String> uploadFuture = CompletableFuture.supplyAsync(() -> {
             try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
                 return ossService.upload(BucketConstant.COMMON_BUCKET_NAME, bis, originalFilename);
@@ -204,8 +201,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                 return null;
             }
         }, EXECUTOR_SERVICE);
-        System.out.println(System.currentTimeMillis());
-        // 保存文件信息
         Files bookFile = new Files();
         bookFile.setSize(multipartFile.getSize());
         bookFile.setType(dbType);
@@ -216,7 +211,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         bookFile.setUserId(UserHolder.get());
         filesService.save(bookFile);
 
-        // 保存图片信息
         Files imgFile = new Files();
         imgFile.setFormat("image/jpeg");
         imgFile.setType("图片");
@@ -226,12 +220,10 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         imgFile.setUserId(UserHolder.get());
         filesService.save(imgFile);
 
-        // 获取元数据
         Object metadata = metadataFuture.get();
 
         record TMP(BookUtils.MetaData metaData, String imgId, String bookId) {
         }
-        System.out.println(System.currentTimeMillis());
         return Response.success(
                 new TMP((BookUtils.MetaData) metadata, imgFile.getId().toString(), bookFile.getId().toString()));
     }
@@ -246,7 +238,7 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @SneakyThrows
     @Override
     @Async
-    public void insertContestPages(Long fileId, Integer pages) {
+    public void insertContestPages(Long pk, Long fileId, Integer pages) {
         Files bookFile = filesService.getById(fileId);
         String filePath = bookFile.getFilePath();
 //        System.out.println(filePath); //62d96c427fa5ad55c8100877e90383814cbd3fecd4408a989eb339473ac7f98b_《程序员的数学：线性代数》第三册.pdf
@@ -255,13 +247,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         }
         InputStream download = osService.download(BucketConstant.COMMON_BUCKET_NAME, filePath);
         byte[] bytes = download.readAllBytes();
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-//        FileOutputStream fileOutputStream = new FileOutputStream("./out.pdf");
-//        fileOutputStream.write(byteArrayInputStream.readAllBytes());
-//        fileOutputStream.flush();
-//        fileOutputStream.close();
-
-
         try (PDDocument pdDocument = Loader.loadPDF(bytes)) {
             int pageCount = pdDocument.getNumberOfPages();
             Long count = bookContentPageMapper.selectCount(new LambdaQueryWrapper<BookContentPage>()
@@ -278,32 +263,37 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             // 遍历每一页并提取内容
             ArrayList<BookContentPage> list = new ArrayList<>();
             BookContentPageMapper mapper = sqlSession.getMapper(BookContentPageMapper.class);
+
             for (int page = 1; page <= pageCount; page++) {
                 stripper.setStartPage(page);
                 stripper.setEndPage(page);
                 String pageContent = stripper.getText(pdDocument);
                 // 去除无用字符
-                pageContent = removeUselessCharactersByHanLP(pageContent);
+//                pageContent = removeUselessCharactersByHanLP(pageContent);
                 // 生成摘要
                 String summary = generateSummary(pageContent);
                 pageContent = summary +
                         "\n=========================\n"
                         + pageContent;
                 BookContentPage bookContentPage = new BookContentPage();
-                bookContentPage.setBookId(fileId);
+                bookContentPage.setBookId(pk);
                 bookContentPage.setPage(page);
                 bookContentPage.setContent(pageContent);
                 PDPage pdPage = pdDocument.getPage(page - 1);
-                bookContentPage.setPdfPageStream(getStreamByPage(pdPage));
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bookContentPage.setPdfPageStream(Base64.encodeBase64String(getStreamByPage(pdPage, byteArrayOutputStream)));
                 list.add(bookContentPage);
                 if (list.size() % 50 == 0) {
-                    mapper.insertBatchSomeColumn(list);
+                    bookContentPageService.saveBatch(list);
+//                    mapper.insertBatchSomeColumn(list);
                     list.clear();
                 }
             }
-            mapper.insertBatchSomeColumn(list);
+            bookContentPageService.saveBatch(list);
+//            mapper.insertBatchSomeColumn(list);
             list.clear();
         }
+//        Thread.sleep(1000L); //等一下事务结束，非必须
     }
 
 
@@ -318,22 +308,24 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
     @Override
     public BooksInfoHomePage getBooksInfoById(Long id) {
         Books book = this.getById(id);
-        book.setViewCount(book.getViewCount() + 1);
+        book.setViewCount(book.getViewCount() == null ? 1 : book.getViewCount() + 1);
         Long fileId = book.getFileId();
         Long coverImageId = book.getCoverImageId(); //封面id？
         Files coverage = filesService.getById(coverImageId);
         byte[] coverageByes = null;
+        String coverageBase64 = null;
 //        ==================================获取封面信息
         if (!ossService.doesObjectExist(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath())) {
             //如果不存在的话？ 直接去contents表获取第一页-1数据，直接返回
             BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
                     .eq(BookContentPage::getBookId, fileId)
                     .eq(BookContentPage::getPage, 0));
-            coverageByes = bookContentPage.getPdfPageStream();
+            coverageBase64 = bookContentPage.getPdfPageStream();//进行base64编码
         } else {
             coverageByes = osService.download(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath()).readAllBytes();
+            coverageBase64 = Base64.encodeBase64String(coverageByes);
         }
-        String coverageBase64 = Base64.encodeBase64String(coverageByes);//进行base64编码
+
 //        ===================================获取热门评论点评
         List<BookOpinions> list = bookOpinionsService.list(new LambdaQueryWrapper<BookOpinions>()
                 .eq(BookOpinions::getBookId, fileId)
@@ -357,29 +349,33 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
                 .eq(BookContentPage::getBookId, id)
                 .eq(BookContentPage::getPage, pageNumber));
-        byte[] pdfPageStream = bookContentPage.getPdfPageStream();
-        String pageBase64 = Base64.encodeBase64String(pdfPageStream);//进行base64编码
+        String pageBase64 = bookContentPage.getPdfPageStream();//进行base64编码
         //===========================获取当前页数
 //        获取本页所有下划线标注
         List<BookUnderlineCoordinates> list = bookUnderlineCoordinatesService.list(new LambdaQueryWrapper<BookUnderlineCoordinates>()
                 .eq(BookUnderlineCoordinates::getBookId, id)
                 .eq(BookUnderlineCoordinates::getPageNumber, pageNumber));
-        Set<Long> underlinesSelf =
-                list.parallelStream().filter(a -> userId.equals(a.getUserId()))
-                        .map(BookUnderlineCoordinates::getId).collect(Collectors.toSet());
-//       ========================= 必须要显示的
-        Set<Long> collect = list.parallelStream().map(BaseModel::getId).collect(Collectors.toSet());
+        Set<Long> collect = null;
+        Set<Long> underlines = null;
+        if (!(list == null || list.isEmpty())) {
+            collect = list.parallelStream().map(BaseModel::getId).collect(Collectors.toSet());
+            Set<Long> underlinesSelf =
+                    list.parallelStream().filter(a -> userId.equals(a.getUserId()))
+                            .map(BookUnderlineCoordinates::getId).collect(Collectors.toSet());
+            collect.removeAll(underlinesSelf);
+            underlines = underlinesSelf;
+        }
 
-        collect.removeAll(underlinesSelf);
+//       ========================= 必须要显示的
         List<BookOpinions> hotPublicOpinions = bookOpinionsService.list(new LambdaQueryWrapper<BookOpinions>()
                 .eq(BookOpinions::getBookId, id)
-                .in(BookOpinions::getUnderlinedId, collect)
+                .in(collect != null, BookOpinions::getUnderlinedId, collect)
                 .orderByDesc(BookOpinions::getLikeCount, BookOpinions::getCreateAt)
                 .last("limit 10")); //大众化的
         List<BookOpinions> selfOpinions = bookOpinionsService.list(new LambdaQueryWrapper<BookOpinions>()
                 .eq(BookOpinions::getBookId, id)
                 .eq(BookOpinions::getUserId, userId)
-                .in(BookOpinions::getUnderlinedId, underlinesSelf)); //个人标注 + 也可能是hot
+                .in(underlines != null, BookOpinions::getUnderlinedId, underlines)); //个人标注 + 也可能是hot
 //      ==================================  统一进行处理，  查询出对该标注的评论
         hotPublicOpinions.addAll(selfOpinions);
 //        todo 这里要进行标注内容比对，进行分类，只筛选，hanlp 做语义相似度解析
@@ -412,19 +408,22 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             String coverageBase64 = null;
             Long coverImageId = book.getCoverImageId();
             Files coverage = filesService.getById(coverImageId);
-            if (!ossService.doesObjectExist(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath())) {
-                BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
-                        .eq(BookContentPage::getBookId, book.getId())
-                        .eq(BookContentPage::getPage, 0));
-                if (bookContentPage == null) {
-                    continue;
+            if (coverage.getFilePath() != null) {
+                if (!ossService.doesObjectExist(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath())) {
+                    BookContentPage bookContentPage = bookContentPageMapper.selectOne(new LambdaQueryWrapper<BookContentPage>()
+                            .eq(BookContentPage::getBookId, book.getId())
+                            .eq(BookContentPage::getPage, 0));
+                    if (bookContentPage == null) {
+                        continue;
+                    }
+                    coverageBase64 = bookContentPage.getPdfPageStream();
+                } else {
+                    coverageByes = osService.download(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath()).readAllBytes();
+                    coverageBase64 = Base64.encodeBase64String(coverageByes);
                 }
-                coverageByes = bookContentPage.getPdfPageStream();
-            } else {
-                coverageByes = osService.download(BucketConstant.COMMON_BUCKET_NAME, coverage.getFilePath()).readAllBytes();
+                result.add(new BooksService.BooksInfoHomePage(book, coverageBase64, null, null));
             }
-            coverageBase64 = coverageByes == null ? "" : Base64.encodeBase64String(coverageByes);
-            result.add(new BooksService.BooksInfoHomePage(book, coverageBase64, null, null));
+
         }
         return result;
     }
@@ -476,6 +475,36 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
         return null;
     }
 
+    private String generateSummary(String text) {
+        // 使用 HanLP 生成摘要
+        List<String> phraseList = HanLP.extractPhrase(text, 10);
+        StringBuilder summary = new StringBuilder();
+        for (String sentence : phraseList) {
+            summary.append(sentence).append(" ");
+        }
+        return summary.toString().trim();
+    }
+
+    @SneakyThrows
+    private byte[] getStreamByPage(PDPage pdPage, ByteArrayOutputStream baos) {
+        PDResources resources = pdPage.getResources();
+        for (COSName xObjectName : resources.getXObjectNames()) {
+            PDXObject pdxObject = resources.getXObject(xObjectName);
+            if (pdxObject instanceof PDImageXObject image) {
+//                System.out.println("Found image with width "
+//                        + image.getWidth()
+//                        + "px and height "
+//                        + image.getHeight()
+//                        + "px.");
+                BufferedImage bufferedImage = image.getImage();
+                ImageIO.write(bufferedImage, "png", baos);
+                baos.flush();
+                return baos.toByteArray();
+            }
+        }
+        return null;
+    }
+
     private String removeUselessCharactersByHanLP(String text) {
         List<Term> termList = NLPTokenizer.segment(text);
         StringBuilder result = new StringBuilder();
@@ -485,39 +514,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
             }
         }
         return result.toString().trim();
-    }
-
-    private String generateSummary(String text) {
-        // 使用 HanLP 生成摘要
-        List<String> phraseList = HanLP.extractPhrase(text, 10);
-        System.out.println(phraseList);
-        StringBuilder summary = new StringBuilder();
-        for (String sentence : phraseList) {
-            summary.append(sentence).append(" ");
-        }
-        return summary.toString().trim();
-    }
-
-    @SneakyThrows
-    private byte[] getStreamByPage(PDPage pdPage) {
-        PDResources resources = pdPage.getResources();
-        for (COSName xObjectName : resources.getXObjectNames()) {
-            PDXObject pdxObject = resources.getXObject(xObjectName);
-            if (pdxObject instanceof PDImageXObject image) {
-                System.out.println("Found image with width "
-                        + image.getWidth()
-                        + "px and height "
-                        + image.getHeight()
-                        + "px.");
-                BufferedImage bufferedImage = image.getImage();
-                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                    ImageIO.write(bufferedImage, "png", baos);
-                    baos.flush();
-                    return baos.toByteArray();
-                }
-            }
-        }
-        return null;
     }
 
     private boolean isUselessTerm(Term term) {

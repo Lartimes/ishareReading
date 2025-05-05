@@ -28,7 +28,7 @@ public interface BooksService extends IService<Books> {
 
     Response getMetadata(MultipartFile file);
 
-    void insertContestPages(Long fileId, Integer pages);
+    void insertContestPages(Long pk , Long fileId, Integer pages);
 
     BooksInfoHomePage getBooksInfoById(Long id);
 
@@ -52,7 +52,7 @@ public interface BooksService extends IService<Books> {
     /**
      * 首页门户书籍信息
      */
-    record BooksInfoHomePage(Books books, String coverageBase64, List<org.ishareReading.bankai.model.BookOpinions> list,
+    record BooksInfoHomePage(Books books, String coverageBase64, List<org.ishareReading.bankai.model.BookOpinions> opinions,
                              Integer pageNum) {
 
     }

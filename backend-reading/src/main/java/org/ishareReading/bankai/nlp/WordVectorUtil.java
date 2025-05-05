@@ -83,22 +83,27 @@ public class WordVectorUtil {
         ArrayList<Types> result = new ArrayList<>(keywords.size());
         keywords.parallelStream().forEach(keyword -> {
             Vector vector = wordVectorModel.vector(keyword);
-            Types types = new Types();
-            types.setEmbedding(vector.getElementArray());
-            types.setType(type);
-            types.setTypeName(keyword);
-            result.add(types);
+            if (vector != null) {
+                Types types = new Types();
+                types.setEmbedding(vector.getElementArray());
+                types.setType(type);
+                types.setTypeName(keyword);
+                result.add(types);
+            }
         });
         return result;
     }
-     public Collection<BookVector> generateVector(List<String> keywords) {
+
+    public Collection<BookVector> generateVector(List<String> keywords) {
         ArrayList<BookVector> result = new ArrayList<>(keywords.size());
         keywords.parallelStream().forEach(keyword -> {
             Vector vector = wordVectorModel.vector(keyword);
-            BookVector bookVector = new BookVector();
-            bookVector.setEmbedding(vector.getElementArray());
-            bookVector.setName(keyword);
-            result.add(bookVector);
+            if (vector != null) {
+                BookVector bookVector = new BookVector();
+                bookVector.setEmbedding(vector.getElementArray());
+                bookVector.setName(keyword);
+                result.add(bookVector);
+            }
         });
         return result;
     }

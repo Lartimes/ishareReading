@@ -31,9 +31,7 @@ public class LoginListener {
     private AgentsService agentsService;
 
     /**
-     *  1.初始化模型
-     * 或者
-     *  2.更新上次登录的模型，进行更新，只留下最感兴趣的几个
+     * 1.初始化模型 或者 2.更新上次登录的模型，进行更新，只留下最感兴趣的几个
      *
      * @param users
      */
@@ -43,7 +41,6 @@ public class LoginListener {
         System.out.println("监听到登陆事件");
         Long userId = users.getId();
         String userModelStr = redisCacheUtil.getKey(RedisConstant.USER_MODEL + userId);
-        System.out.println(userModelStr);
         if (userModelStr.equals("null")) {
             UserModel userModel = new UserModel();
             userModel.setReadingTime(RANDOM.nextInt(1000, 5000));
@@ -53,7 +50,7 @@ public class LoginListener {
             return;
         }
         UserModel userModel = objectMapper.readValue(userModelStr, UserModel.class);
-        if(userModel == null){
+        if (userModel == null) {
             return;
         }
         userModel.setReadingFrequency(userModel.getReadingFrequency() + 1 > 7 ? 7 : userModel.getReadingFrequency());

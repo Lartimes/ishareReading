@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @TableName("users")
+@ToString
 public class Users extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -36,11 +39,6 @@ public class Users extends BaseModel implements Serializable {
     @TableField("user_name")
     private String userName;
 
-    /**
-     * 账户
-     */
-    @TableField("account")
-    private String account;
 
     /**
      * 密码
@@ -78,4 +76,6 @@ public class Users extends BaseModel implements Serializable {
     @TableField("last_login_time")
     private LocalDateTime lastLoginTime;
 
+    @TableField(exist = false)
+    private String avatarBase64;
 }

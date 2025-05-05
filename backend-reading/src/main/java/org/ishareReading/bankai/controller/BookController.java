@@ -66,6 +66,7 @@ public class BookController {
         new Thread(() -> {
             redisCacheUtil.addZSetWithScores(RedisConstant.BOOKS_HISTORY + userId, id, null);
         }).start();
+
         return Response.success(booksService.getBooksInfoById(id));
     }
 
@@ -114,13 +115,14 @@ public class BookController {
     }
 
     /**
-     * 根据页数获取书籍 默认五条，不做分页了，浪费时间
+     * 根据页数获取书籍 默认六条，不做分页了，浪费时间
      */
     @GetMapping("/getBooksPages")
     public Response getBooksPages(@RequestParam(defaultValue = "1") Integer page) {
         List<Books> list = booksService.list();
         int size = list.size();
-        list = size > 6 ? list.subList((page - 1) * 6, size) : list;
+        int end = (page - 1) * 6;
+        list = size > 6 ? list.subList(end, end + 6) : list;
         return Response.success(booksService.convert2HomePage(list));
     }
 

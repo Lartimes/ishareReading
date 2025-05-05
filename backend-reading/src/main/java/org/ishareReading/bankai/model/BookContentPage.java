@@ -23,8 +23,8 @@ public class BookContentPage extends BaseModel implements Serializable {
     private String content;
 
     //    实际上转了img
-    @TableField(value = "pdf_page_stream", exist = false)
-    private byte[] pdfPageStream;
+    @TableField(value = "pdf_page_stream", exist = true)
+    private String pdfPageStream; //base64
     @TableField("page")
     private Integer page;
 }

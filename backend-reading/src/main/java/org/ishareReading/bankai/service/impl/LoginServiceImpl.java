@@ -93,13 +93,13 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public boolean checkEmailCode(String email, String captchaCode) {
+    public boolean checkEmailCode(String email, String emailCode) {
         if (!redisCacheUtil.hashKey(email)) {
             LOG.error("邮箱验证码失效");
             throw new BusinessException("邮箱验证码失效");
         }
         final String code = redisCacheUtil.getKey(email);
-        if (!code.equals(captchaCode)) {
+        if (!code.equals(emailCode)) {
             LOG.error("验证码错误");
             throw new BusinessException("验证码错误");
         }

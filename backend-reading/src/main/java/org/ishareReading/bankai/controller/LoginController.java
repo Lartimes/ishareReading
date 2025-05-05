@@ -1,6 +1,7 @@
 package org.ishareReading.bankai.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.ishareReading.bankai.model.Users;
 import org.ishareReading.bankai.response.Response;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/login")
 public class LoginController {
@@ -44,10 +46,11 @@ public class LoginController {
         String md5Password = DigestUtils.md5Hex(user.getPassword());
         user.setPassword(md5Password);
         final Users login = userService.login(user);
-        String token = jwtUtils.getToken(login.getId(), login.getAccount());
+        String token = jwtUtils.getToken(login.getId(), login.getUserName());
         final HashMap<Object, Object> map = new HashMap<>();
         map.put("token", token);
-        map.put("name", login.getAccount());
+        map.put("name", login.getUserName());
+        System.out.println(login);
         map.put("user", login);
         eventPublisher.publishEvent(login);
         return Response.success(map);
@@ -97,9 +100,9 @@ public class LoginController {
         }
         return Response.success("注册成功");
     }
-    @GetMapping("/check")
-    public Response check(@RequestParam("email") String email,
-                          @RequestParam("code") String captchaCode) {
+
+    public Response check(String email,
+                          String captchaCode) {
         if (email == null || captchaCode == null) {
             throw new IllegalArgumentException("参数不正确");
         }

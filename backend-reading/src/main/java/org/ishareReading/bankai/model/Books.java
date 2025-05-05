@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.ishareReading.bankai.config.JsonbTypeHandler;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -94,31 +93,31 @@ public class Books extends BaseModel implements Serializable {
      * 评分
      */
     @TableField("average_rating")
-    private BigDecimal averageRating;
+    private BigDecimal averageRating ;
 
     /**
      * 用户评价总数改为 点赞数,
      */
     @TableField("rating_count")
-    private Integer ratingCount;
+    private Integer ratingCount = 0;
 
     /**
      * 浏览量
      */
     @TableField("view_count")
-    private Integer viewCount;
+    private Integer viewCount  = 0 ;
 
     /**
      * 下载量
      */
     @TableField("download_count")
-    private Integer downloadCount;
+    private Integer downloadCount = 0 ;
 
     /**
      * 上传时间
      */
     @TableField("upload_time")
-    private LocalDateTime uploadTime;
+    private LocalDateTime uploadTime = LocalDateTime.now();
 
     /**
      * 用户id
@@ -132,8 +131,8 @@ public class Books extends BaseModel implements Serializable {
     @TableField("file_id")
     private Long fileId;
 
-    @TableField(value = "structure" , typeHandler = JsonbTypeHandler.class)
-    private Object structure;
+    @TableField(value = "structure")
+    private String structure;
 
 
 }
