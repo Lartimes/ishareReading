@@ -97,7 +97,7 @@ public class LoginController {
         }
         return Response.success("注册成功");
     }
-
+    @GetMapping("/check")
     public Response check(@RequestParam("email") String email,
                           @RequestParam("code") String captchaCode) {
         if (email == null || captchaCode == null) {
