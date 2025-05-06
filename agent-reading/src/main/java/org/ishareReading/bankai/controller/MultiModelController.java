@@ -8,11 +8,10 @@ import org.ishareReading.bankai.util.SSEUtils;
 import org.ishareReading.bankai.util.Video2ImgUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.Media;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
@@ -27,17 +26,16 @@ public class MultiModelController {
     private static final String DEFAULT_PROMPT = "这些是什么？";
     private static final String DEFAULT_VIDEO_PROMPT = "这是一组从视频中提取的图片帧，请描述此视频中的内容。";
     private static final String DEFAULT_MODEL = "qwen-vl-max-latest";
-    private final ChatClient dashScopeChatClient;
 
-    public MultiModelController(@Qualifier("dashscopeChatModel") ChatModel chatModel) {
-        this.dashScopeChatClient = ChatClient.builder(chatModel).build();
-    }
+    @Autowired
+    private ChatClient dashScopeChatClient;
 
 //    qwen-vl-ocr
 
     @SneakyThrows
     @PostMapping("/stream/video")
-    public String video(
+    public Flux<ServerSentEvent<String>> video(
+//    public String video(
             @RequestParam(value = "prompt", required = false, defaultValue = DEFAULT_VIDEO_PROMPT) String prompt,
             @RequestPart("file") MultipartFile file
     ) {
@@ -46,7 +44,7 @@ public class MultiModelController {
         UserMessage message = new UserMessage(prompt, mediaList);
         message.getMetadata().put(DashScopeChatModel.MESSAGE_FORMAT, MessageFormat.IMAGE);
 
-        return dashScopeChatClient.prompt(
+        Flux<ChatResponse> flux = dashScopeChatClient.prompt(
                 new Prompt(
                         message,
                         DashScopeChatOptions.builder()
@@ -54,7 +52,8 @@ public class MultiModelController {
                                 .withMultiModel(true)
                                 .build()
                 )
-        ).call().chatResponse().getResult().getOutput().getText();
+        ).stream().chatResponse();
+        return SSEUtils.result(flux);
     }
 
     @PostMapping("/stream/image")

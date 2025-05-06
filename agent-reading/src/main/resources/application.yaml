@@ -1,8 +1,4 @@
 server:
-  port: 8080
-  servlet:
-    context-path: /ishareReading
-
   tomcat:
     threads:
       max: 200 # 最大工作线程数
@@ -17,7 +13,6 @@ spring:
       enabled: true
       max-file-size: 200MB
       max-request-size: 200MB
-
   application:
     name: agent-reading
   ai:
@@ -28,10 +23,11 @@ spring:
       rerank:
         options:
           model: gte-rerank-v2
+        api-key: sk-8b67da98807649bb9886327549af564f
       embedding:
         api-key: sk-8b67da98807649bb9886327549af564f
         options:
-          model: text-embedding-async-v2
+          model: text-embedding-v2
           dimensions: 1536
         base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
       api-key: ${DASHSCOPE_API_KEY:sk-8b67da98807649bb9886327549af564f}

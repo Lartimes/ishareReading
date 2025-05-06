@@ -1,9 +1,15 @@
+--手动创建数据库isharereading
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS hstore;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- 先创建vector extension
+--创建表
 create table files
 (
-    id        bigint       not null
+    id        bigint not null
         constraint pk_files
             primary key,
-    file_path varchar(255) not null,
+    file_path varchar(255),
     file_name varchar(255),
     format    varchar(50),
     type      varchar(50),
@@ -51,7 +57,6 @@ create table users
     email              varchar(255) not null
         unique,
     user_name          varchar(50)  not null,
-    account            varchar(50)  not null,
     password           varchar(255) not null,
     self_intro         text,
     sex                varchar(10),
@@ -70,8 +75,6 @@ comment on column users.id is '主键';
 comment on column users.email is '邮箱';
 
 comment on column users.user_name is '用户名';
-
-comment on column users.account is '账户';
 
 comment on column users.password is '密码';
 
@@ -239,7 +242,7 @@ create table books
     create_at        timestamp,
     update_at        timestamp,
     delete_at        timestamp,
-    structure        jsonb
+    structure        text
 );
 
 comment on table books is '书籍表';
@@ -561,7 +564,6 @@ create table sessions
             primary key,
     title       varchar(255),
     user_id     bigint not null,
-    agent_id    bigint,
     archived    boolean default false,
     description text,
     metadata    jsonb,
@@ -578,8 +580,6 @@ comment on column sessions.id is '会话唯一ID';
 comment on column sessions.title is '会话标题';
 
 comment on column sessions.user_id is '所属用户ID';
-
-comment on column sessions.agent_id is '关联的agentId';
 
 comment on column sessions.archived is '是否归档';
 
@@ -607,7 +607,6 @@ create table messages
     role        varchar(20) not null,
     content     text        not null,
     token_count integer,
-    model       varchar(50),
     create_at   timestamp,
     update_at   timestamp,
     delete_at   timestamp,
@@ -626,8 +625,6 @@ comment on column messages.content is '消息内容';
 
 comment on column messages.token_count is 'Token数量(可选，用于统计)';
 
-comment on column messages.model is '使用的模型';
-
 comment on column messages.create_at is '创建时间';
 
 comment on column messages.update_at is '更新时间';
@@ -641,21 +638,21 @@ alter table messages
 
 create table book_content_page
 (
-    id                 bigint not null,
-    book_id            bigint,
-    content            text,
-    "pdf_page_stream " bytea,
-    page               integer,
-    create_at          timestamp,
-    update_at          timestamp,
-    delete_at          timestamp
+    id              bigint not null,
+    book_id         bigint,
+    content         text,
+    pdf_page_stream text,
+    page            integer,
+    create_at       timestamp,
+    update_at       timestamp,
+    delete_at       timestamp
 );
 
 comment on column book_content_page.book_id is '关联书籍id';
 
 comment on column book_content_page.content is '这一页的内容';
 
-comment on column book_content_page."pdf_page_stream " is 'pdf当前页数文件流';
+comment on column book_content_page.pdf_page_stream is 'pdf当前页数文件流';
 
 comment on column book_content_page.page is '当前页数（主要内容）只有大部分为文本才会记录，否则使用pdf在线预览该页';
 
@@ -671,7 +668,8 @@ create table "Knowledge_base"
     "content " text,
     create_at  timestamp,
     update_at  timestamp,
-    delete_at  timestamp
+    delete_at  timestamp,
+    embedding  vector
 );
 
 comment on table "Knowledge_base" is '用户自定义添加的知识库';
@@ -702,8 +700,51 @@ comment on column dynamic_prompt.prompt_tempalte is '提示词模板';
 alter table dynamic_prompt
     owner to postgres;
 
+create table long_term_memory
+(
+    id          bigint      not null
+        primary key,
+    session_id  bigint      not null,
+    role        varchar(20) not null,
+    content     text        not null,
+    token_count integer,
+    model       varchar(50),
+    create_at   timestamp,
+    update_at   timestamp,
+    delete_at   timestamp,
+    actived     boolean
+);
 
-CREATE EXTENSION IF NOT EXISTS vector;
-CREATE EXTENSION IF NOT EXISTS hstore;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+alter table long_term_memory
+    owner to postgres;
+
+create table short_term_memory
+(
+    id          bigint      not null
+        primary key,
+    session_id  bigint      not null,
+    role        varchar(20) not null,
+    content     text        not null,
+    token_count integer,
+    model       varchar(50),
+    create_at   timestamp,
+    update_at   timestamp,
+    delete_at   timestamp,
+    actived     boolean
+);
+
+alter table short_term_memory
+    owner to postgres;
+
+create table vector_store
+(
+    id        uuid default uuid_generate_v4() not null
+        primary key,
+    content   text,
+    metadata  json,
+    embedding vector(1536)
+);
+
+alter table vector_store
+    owner to postgres;
 

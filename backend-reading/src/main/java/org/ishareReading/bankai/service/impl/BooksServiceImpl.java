@@ -153,7 +153,6 @@ public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements
                         }
                         return null;
                     }));
-                    redisCacheUtil.addZSetWithScores(RedisConstant.BOOK_TYPE, books.getUserId(), null);
                 }
 
             }

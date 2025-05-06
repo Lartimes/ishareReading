@@ -1,5 +1,6 @@
 package org.ishareReading.bankai.controller;
 
+import org.ishareReading.bankai.response.Response;
 import org.ishareReading.bankai.service.rag.RagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,8 @@ public class RagController {
     private RagService ragService;
 
     @PostMapping("/importResources")
-    public void importResources(@RequestPart MultipartFile file) {
+    public Response importResources(@RequestPart MultipartFile file) {
         ragService.importDocuments(file.getResource());
+        return  Response.success("导入成功");
     }
 }

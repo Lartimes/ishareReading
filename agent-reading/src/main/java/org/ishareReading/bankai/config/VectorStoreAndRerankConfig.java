@@ -1,12 +1,16 @@
 package org.ishareReading.bankai.config;
 
 import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.dashscope.embedding.DashScopeEmbeddingModel;
 import com.alibaba.cloud.ai.dashscope.embedding.DashScopeEmbeddingOptions;
 import com.alibaba.cloud.ai.dashscope.rerank.DashScopeRerankModel;
 import com.alibaba.cloud.ai.dashscope.rerank.DashScopeRerankOptions;
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.ai.autoconfigure.vectorstore.pgvector.PgVectorStoreProperties;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.BatchingStrategy;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -33,6 +37,22 @@ public class VectorStoreAndRerankConfig {
     private String rerankModel;
     @Value("${spring.ai.dashscope.embedding.options.model}")
     private String vectorModel;
+
+    @Bean
+    public ChatClient dashScopeChatClient(){
+        return ChatClient.builder(new DashScopeChatModel(new DashScopeApi(apiKey)))
+                .defaultAdvisors(
+                        new SimpleLoggerAdvisor()
+                )
+                // 设置 ChatClient 中 ChatModel 的 Options 参数
+                .defaultOptions(
+                        DashScopeChatOptions.builder()
+                                .withTopP(0.7)
+                                .build()
+                )
+                .build();
+
+    }
 
     @Bean
     public DashScopeRerankModel rerankModel() {
@@ -81,7 +101,7 @@ public class VectorStoreAndRerankConfig {
     @Bean
     public EmbeddingModel embeddingModel() {
         DashScopeEmbeddingOptions build = DashScopeEmbeddingOptions.builder().build();
-        build.setModel("text-embedding-v2");
+        build.setModel(vectorModel);
         build.setDimensions(1536);
         return new DashScopeEmbeddingModel(new DashScopeApi(apiKey)
                 , MetadataMode.EMBED, build);

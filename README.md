@@ -27,6 +27,7 @@
 
 ```
 ishareReading/
+├── Front-End            #前端界面
 ├── oss-starter/          # 对象存储服务模块
 ├── common/              # 公共组件模块
 ├── agent-reading/       # Agent阅读模块
@@ -131,7 +132,6 @@ cd ishareReading
 2. 使用 Docker Compose 启动 
 ```bash
 cd docker-compose
-chmod +x linux_start.sh
 sh linux_start.sh
 ```
 
@@ -143,14 +143,9 @@ sh linux_start.sh
 cd oss-starter
 mvn clean install
 
-cd ../common
+cd ../ishareReadingParent
 mvn clean install
 
-cd ../agent-reading
-mvn clean install
-
-cd ../backend-reading
-mvn clean install
 cd ..
 ```
 
@@ -168,14 +163,23 @@ docker-compose up -d
 cd ../redis
 docker-compose up -d
 cd ..
+
+docker-compose -f docker-compose.yml up --build -d
+
+#=============或者启动好依赖服务之后手动启动jar包
 sh build-backend.sh
 docker run --name ishareReading -dp 8080:8080 ishareReading:latest
-#=============或者启动好依赖服务之后手动启动jar包
+
 java -jar backend-reading-1.0.0.jar & 
 
 #无报错即为成功 
-
 ```
+4.启动前端
+```bash
+    cd ../Front-End
+    sh build.sh
+````
+
 
 
 ## 📝 开发计划

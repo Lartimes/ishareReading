@@ -22,7 +22,8 @@ public class AgentsReadingController {
 
 
     @PostMapping("/readingByName")
-    public Flux<ServerSentEvent<String>> readingByName(@RequestParam("sessionId") String sessionId, @RequestParam("agentName") String name,
+    public Flux<ServerSentEvent<String>> readingByName(@RequestParam("sessionId") String sessionId,
+                                                       @RequestParam("agentName") String name,
                                                        @RequestParam("userInput") String userInput,
                                                        HttpServletResponse response) {
         response.setCharacterEncoding("UTF-8");

@@ -87,10 +87,10 @@ public class UserModelController {
         List<Types> similarTypes = typesMapper.findSimilarTypes(map);
         Set<String> collect = similarTypes.stream().map(Types::getTypeName).collect(Collectors.toSet());
         collect.removeAll(types); //删除概率数组中的，type库中随机拿
-        ArrayList<String> pushTypes = new ArrayList<>();
+        Set<String> pushTypes = new HashSet<>();
         size = Math.max(size, PUSH_SIZE);
         for (int i = 0; i < size; i++) {
-            int index = random.nextInt(0, strings.length);
+            int index = random.nextInt(0, size);
             pushTypes.add(strings[index]);
         }
         pushTypes.addAll(collect);

@@ -43,7 +43,7 @@ public class HotRank {
 
     // 书本热度排行榜
 //    @Scheduled(cron = "0 0 */1 * * ?")        // 每隔小时执行一次
-     @Scheduled(fixedRate = 15 * 60 * 1000)
+     @Scheduled(cron = "0 0/30 * * * ?")
     public void bookHotRank() {
         LOG.info("book hot rank");
         final TopK topK = new TopK(10, new PriorityQueue<HotBook>(10, Comparator.comparing(HotBook::getHot)));

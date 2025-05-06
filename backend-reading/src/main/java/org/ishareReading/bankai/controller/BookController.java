@@ -120,9 +120,6 @@ public class BookController {
     @GetMapping("/getBooksPages")
     public Response getBooksPages(@RequestParam(defaultValue = "1") Integer page) {
         List<Books> list = booksService.list();
-        int size = list.size();
-        int end = (page - 1) * 6;
-        list = size > 6 ? list.subList(end, end + 6) : list;
         return Response.success(booksService.convert2HomePage(list));
     }
 

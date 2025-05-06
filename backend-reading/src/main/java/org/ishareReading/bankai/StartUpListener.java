@@ -2,6 +2,7 @@ package org.ishareReading.bankai;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import org.ishareReading.bankai.model.Agents;
+import org.ishareReading.bankai.scheduletasks.HotRank;
 import org.ishareReading.bankai.service.AgentsService;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class StartUpListener implements CommandLineRunner {
     @Autowired
     private ElasticsearchClient elasticsearchClient;
 
+    @Autowired
+    private HotRank hotRank;
     @Value("${spring.data.redis.host}")
     private String redisHost;
     @Override
@@ -29,11 +32,14 @@ public class StartUpListener implements CommandLineRunner {
         agentsService.registerAgentsByUserId(1L);
         Map<Agents, ChatModel> agentsByUserId = agentsService.getAgentsByUserId(1L);
         System.out.println(agentsByUserId);
+
         agentsByUserId.forEach((k, v) -> System.out.println(k + ":" + v));
         System.out.println(redisHost);
         System.out.println(redisTemplate);
         System.out.println(redisTemplate.getClientList());
         System.out.println(elasticsearchClient);
+
+        hotRank.bookHotRank();
     }
 
 }
