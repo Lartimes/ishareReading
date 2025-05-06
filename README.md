@@ -101,7 +101,21 @@ ishareReading/
 │       └───conf
 ├───ishareReadingParent #Maven父工程，定义版本依赖
 ├───oss-starter #基于Aliyun SDK 自定义Starter自动配置
-└───sql #PostgreSQL 脚本
+├───sql #PostgreSQL 脚本
+├───Front-End
+│   ├───public
+│   │   └───images 
+│   └───src 
+│       ├───api  #接口定义
+│       ├───assets #静态图片
+│       │   ├───avatars
+│       │   └───book-covers
+│       ├───components #界面组件
+│       ├───config #配置
+│       ├───layouts #包装组件
+│       ├───router #路由
+│       ├───utils #工具类
+
 ```
 
 
